@@ -1,0 +1,39 @@
+# ============================================================================
+# .gitignore — PetCare EVA3
+# ----------------------------------------------------------------------------
+# Evita versionar archivos sensibles, temporales o generados automáticamente.
+# ============================================================================
+
+# Entorno virtual de Python (se reconstruye con pip install -r requirements.txt)
+venv/
+env/
+.venv/
+
+# Variables de entorno y secretos (NUNCA versionar credenciales)
+.env
+.env.local
+*.env
+
+# Bytecode y cachés de Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Archivos de Django
+*.sqlite3
+db.sqlite3
+staticfiles/
+media/
+
+# Sistema operativo y editores
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# Logs y temporales
+*.log
+logs/
+tmp/
