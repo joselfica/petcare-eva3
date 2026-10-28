@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{#
+============================================================================
+home.html — Página de inicio del sistema
+----------------------------------------------------------------------------
+Archivo: templates/home.html
+Propósito:
+    Portada provisional mostrada tras el login. En la Fase 4 se
+    reemplazará por un dashboard con accesos a los módulos del sistema.
+============================================================================
+#}
+
+{% block title %}Inicio — PetCare{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="p-5 mb-4 bg-white rounded-3 shadow-sm">
+            <h1 class="display-6">🐾 Bienvenido(a) a PetCare</h1>
+            <p class="lead">
+                Sistema de gestión de citas y fichas médicas para la clínica
+                veterinaria PetCare.
+            </p>
+            <hr>
+            <p class="mb-0">
+                Usuario: <strong>{{ user.username }}</strong> ·
+                Rol: <strong>
+                    {% for g in user.groups.all %}{{ g.name }}{% if not forloop.last %}, {% endif %}{% empty %}Sin grupo{% endfor %}
+                </strong>
+            </p>
+        </div>
+
+        <div class="alert alert-info">
+            <strong>Fase 3 completada.</strong>
+            En la Fase 4 se agregarán las vistas CRUD de Tutores, Mascotas,
+            Citas, Fichas Clínicas y Recordatorios.
+        </div>
+    </div>
+</div>
+{% endblock %}

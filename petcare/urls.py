@@ -1,22 +1,43 @@
 """
-URL configuration for petcare project.
+============================================================================
+Enrutamiento raíz del proyecto — PetCare EVA3
+----------------------------------------------------------------------------
+Archivo: petcare/urls.py
+Propósito:
+    Define las rutas de nivel superior del proyecto:
+        - /admin/            → Django Admin
+        - /accounts/login/   → Vista de login (template propio)
+        - /accounts/logout/  → Vista de logout
+        - /                  → App de dominio `clinica` (se completa en Fase 4)
 
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/6.1/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
+Notas:
+    - Se usan las vistas nativas de Django para login/logout, con
+      templates personalizados en `templates/registration/`.
+    - `LOGIN_REDIRECT_URL` y `LOGOUT_REDIRECT_URL` se configuraron en
+      `settings.py` (Fase 0).
+============================================================================
 """
+
 from django.contrib import admin
-from django.urls import path
+from django.contrib.auth import views as auth_views
+from django.urls import include, path
 
 urlpatterns = [
+    # Panel de administración
     path('admin/', admin.site.urls),
+
+    # Autenticación (login/logout) con templates propios
+    path(
+        'accounts/login/',
+        auth_views.LoginView.as_view(template_name='registration/login.html'),
+        name='login',
+    ),
+    path(
+        'accounts/logout/',
+        auth_views.LogoutView.as_view(template_name='registration/logged_out.html'),
+        name='logout',
+    ),
+
+    # App de dominio (se completa en Fase 4)
+    path('', include('clinica.urls')),
 ]

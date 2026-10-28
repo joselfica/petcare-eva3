@@ -24,6 +24,21 @@ clínicas en papel y la falta de seguimiento en vacunación.
 3. Ficha clínica digital (diagnósticos, tratamientos, recetas, exámenes).
 4. Recordatorios de vacunación y controles periódicos.
 
+## Roles y usuarios demo
+
+El sistema define 3 roles con permisos diferenciados:
+
+| Rol | Acceso |
+|---|---|
+| **Administrador** | Todos los modelos del sistema |
+| **Veterinario** | Mascotas, Citas, Fichas Clínicas y Recordatorios |
+| **Recepcionista** | Tutores, Mascotas y Citas (sin fichas clínicas) |
+
+Crear los grupos y usuarios demo:
+
+```powershell
+python manage.py crear_usuarios_demo
+
 ## Ejecución local (Windows)
 
 ```powershell
