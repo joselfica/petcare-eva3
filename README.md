@@ -43,7 +43,7 @@ python manage.py crear_usuarios_demo
 
 ```powershell
 # 1. Clonar repo
-git clone https://github.com/TU_USUARIO/petcare-eva3.git
+git clone https://github.com/joselfica/petcare-eva3.git
 cd petcare-eva3
 
 # 2. Crear entorno virtual
