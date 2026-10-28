@@ -1,0 +1,5 @@
+{% extends "base.html" %}
+{% block title %}{{ titulo }} — PetCare{% endblock %}
+{% block content %}
+{% include "_form.html" with form=form titulo=titulo submit_label=submit_label cancel_url=cancel_url %}
+{% endblock %}

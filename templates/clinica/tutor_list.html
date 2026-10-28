@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Tutores — PetCare{% endblock %}
+{% block content %}
+<div class="pc-card">
+    <div class="pc-card-header">
+        <h2><i class="bi bi-people me-2"></i>Tutores</h2>
+        <a href="{% url 'clinica:tutor_create' %}" class="btn btn-pc-primary btn-sm">
+            <i class="bi bi-plus-lg me-1"></i> Nuevo Tutor
+        </a>
+    </div>
+
+    {% if tutores %}
+    <div class="table-responsive">
+        <table class="pc-table">
+            <thead>
+                <tr><th>Nombre</th><th>RUT</th><th>Email</th><th>Teléfono</th><th>Mascotas</th><th class="text-end">Acciones</th></tr>
+            </thead>
+            <tbody>
+                {% for t in tutores %}
+                <tr>
+                    <td class="fw-semibold">{{ t.nombre }}</td>
+                    <td>{{ t.rut }}</td>
+                    <td>{{ t.email }}</td>
+                    <td>{{ t.telefono }}</td>
+                    <td><span class="pc-badge pc-badge-pend">{{ t.mascotas.count }}</span></td>
+                    <td class="text-end">
+                        <div class="pc-actions">
+                            <a href="{% url 'clinica:tutor_update' t.pk %}" class="pc-icon-btn" title="Editar"><i class="bi bi-pencil"></i></a>
+                            <a href="{% url 'clinica:tutor_delete' t.pk %}" class="pc-icon-btn danger" title="Eliminar"><i class="bi bi-trash"></i></a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+        {% include "_empty_state.html" with mensaje="Aún no hay tutores registrados." accion_url=create_url accion_label="Crear primer tutor" %}
+    {% endif %}
+</div>
+{% endblock %}

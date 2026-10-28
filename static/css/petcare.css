@@ -1,0 +1,173 @@
+/* ==========================================================================
+   petcare.css — Design system PetCare EVA3
+   --------------------------------------------------------------------------
+   Paleta, tipografía, componentes (cards, tablas, badges, formularios).
+   Se apoya en Bootstrap 5.3 y solo sobreescribe lo necesario.
+   ========================================================================== */
+
+:root {
+    /* Paleta */
+    --pc-primary: #2E7D6F;
+    --pc-primary-dark: #245F55;
+    --pc-accent: #F4A261;
+    --pc-bg: #F5F7F8;
+    --pc-surface: #FFFFFF;
+    --pc-border: #E4E8EA;
+    --pc-text: #1F2937;
+    --pc-text-muted: #6B7280;
+
+    /* Bootstrap override */
+    --bs-primary: var(--pc-primary);
+    --bs-primary-rgb: 46, 125, 111;
+}
+
+/* Base ---------------------------------------------------------------- */
+body {
+    background-color: var(--pc-bg);
+    color: var(--pc-text);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 0.95rem;
+}
+
+h1, h2, h3, h4, h5 { font-weight: 600; letter-spacing: -0.01em; }
+
+a { color: var(--pc-primary); text-decoration: none; }
+a:hover { color: var(--pc-primary-dark); }
+
+/* Navbar -------------------------------------------------------------- */
+.navbar-pc {
+    background-color: var(--pc-primary-dark) !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+}
+.navbar-pc .navbar-brand { font-weight: 700; letter-spacing: -0.02em; }
+.navbar-pc .nav-link { color: rgba(255,255,255,.85) !important; }
+.navbar-pc .nav-link:hover,
+.navbar-pc .nav-link.active { color: #fff !important; }
+
+/* Contenedor --------------------------------------------------------- */
+.pc-container { max-width: 1200px; margin: 0 auto; padding: 0 1rem; }
+
+/* Cards -------------------------------------------------------------- */
+.pc-card {
+    background: var(--pc-surface);
+    border: 1px solid var(--pc-border);
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,.06);
+    padding: 1.5rem;
+}
+.pc-card + .pc-card { margin-top: 1rem; }
+.pc-card-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 1.25rem; padding-bottom: 1rem; border-bottom: 1px solid var(--pc-border);
+}
+.pc-card-header h2 { margin: 0; font-size: 1.15rem; }
+
+/* KPI cards (dashboard) ---------------------------------------------- */
+.pc-kpi {
+    background: var(--pc-surface);
+    border: 1px solid var(--pc-border);
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    display: flex; align-items: center; gap: 1rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,.06);
+    transition: transform .15s ease;
+}
+.pc-kpi:hover { transform: translateY(-2px); }
+.pc-kpi-icon {
+    width: 48px; height: 48px; border-radius: 0.5rem;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(46,125,111,.1); color: var(--pc-primary); font-size: 1.4rem;
+}
+.pc-kpi-value { font-size: 1.6rem; font-weight: 700; line-height: 1; }
+.pc-kpi-label { color: var(--pc-text-muted); font-size: 0.85rem; }
+
+/* Tablas ------------------------------------------------------------- */
+.pc-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+.pc-table thead th {
+    background: #F9FAFB;
+    color: var(--pc-text-muted);
+    font-weight: 600;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--pc-border);
+    text-align: left;
+}
+.pc-table tbody td {
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid var(--pc-border);
+    vertical-align: middle;
+}
+.pc-table tbody tr:hover { background: #FAFBFC; }
+.pc-table tbody tr:last-child td { border-bottom: none; }
+
+.pc-actions { display: inline-flex; gap: 0.35rem; }
+.pc-icon-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 32px; height: 32px; border-radius: 0.5rem;
+    border: 1px solid var(--pc-border); background: var(--pc-surface);
+    color: var(--pc-text-muted); transition: all .15s ease;
+}
+.pc-icon-btn:hover { background: var(--pc-primary); color: #fff; border-color: var(--pc-primary); }
+.pc-icon-btn.danger:hover { background: #DC2626; border-color: #DC2626; }
+
+/* Badges de estado --------------------------------------------------- */
+.pc-badge {
+    display: inline-block; padding: 0.25rem 0.6rem;
+    font-size: 0.75rem; font-weight: 600; border-radius: 999px;
+    line-height: 1.4;
+}
+.pc-badge-pend { background: #F3F4F6; color: #374151; }
+.pc-badge-conf { background: #DBEAFE; color: #1E40AF; }
+.pc-badge-aten { background: #D1FAE5; color: #065F46; }
+.pc-badge-canc { background: #FEE2E2; color: #991B1B; }
+.pc-badge-vac  { background: #EDE9FE; color: #5B21B6; }
+.pc-badge-ctrl { background: #FEF3C7; color: #92400E; }
+.pc-badge-ok   { background: #D1FAE5; color: #065F46; }
+.pc-badge-venc { background: #FEE2E2; color: #991B1B; }
+
+/* Formularios -------------------------------------------------------- */
+.pc-form .form-label { font-weight: 500; color: var(--pc-text); margin-bottom: 0.35rem; }
+.pc-form .form-control,
+.pc-form .form-select {
+    border-radius: 0.5rem; border: 1px solid var(--pc-border);
+    padding: 0.55rem 0.75rem; font-size: 0.95rem;
+}
+.pc-form .form-control:focus,
+.pc-form .form-select:focus {
+    border-color: var(--pc-primary);
+    box-shadow: 0 0 0 3px rgba(46,125,111,.15);
+}
+.pc-form .form-text { color: var(--pc-text-muted); font-size: 0.8rem; }
+.pc-form .invalid-feedback { font-size: 0.8rem; }
+
+/* Botones ------------------------------------------------------------ */
+.btn-pc-primary {
+    background: var(--pc-primary); border-color: var(--pc-primary); color: #fff;
+    border-radius: 0.5rem; font-weight: 500; padding: 0.5rem 1rem;
+}
+.btn-pc-primary:hover { background: var(--pc-primary-dark); border-color: var(--pc-primary-dark); color: #fff; }
+.btn-pc-secondary {
+    background: var(--pc-surface); border: 1px solid var(--pc-border); color: var(--pc-text);
+    border-radius: 0.5rem; font-weight: 500; padding: 0.5rem 1rem;
+}
+.btn-pc-secondary:hover { background: #F3F4F6; color: var(--pc-text); }
+.btn-pc-danger {
+    background: #DC2626; border-color: #DC2626; color: #fff;
+    border-radius: 0.5rem; font-weight: 500; padding: 0.5rem 1rem;
+}
+.btn-pc-danger:hover { background: #B91C1C; border-color: #B91C1C; color: #fff; }
+
+/* Empty state -------------------------------------------------------- */
+.pc-empty {
+    text-align: center; padding: 3rem 1rem; color: var(--pc-text-muted);
+}
+.pc-empty i { font-size: 2.5rem; opacity: 0.4; display: block; margin-bottom: 0.75rem; }
+
+/* Footer ------------------------------------------------------------- */
+.pc-footer {
+    text-align: center; color: var(--pc-text-muted);
+    padding: 1.5rem 0; margin-top: 3rem; font-size: 0.85rem;
+    border-top: 1px solid var(--pc-border);
+}

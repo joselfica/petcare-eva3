@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Recordatorios — PetCare{% endblock %}
+{% block content %}
+<div class="pc-card">
+    <div class="pc-card-header">
+        <h2><i class="bi bi-bell me-2"></i>Recordatorios</h2>
+        <a href="{% url 'clinica:recordatorio_create' %}" class="btn btn-pc-primary btn-sm">
+            <i class="bi bi-plus-lg me-1"></i> Nuevo
+        </a>
+    </div>
+
+    <div class="d-flex gap-2 mb-3">
+        <a href="{% url 'clinica:recordatorio_list' %}" class="btn btn-sm {% if not filtro %}btn-pc-primary{% else %}btn-pc-secondary{% endif %}">Todos</a>
+        <a href="?filtro=pendientes" class="btn btn-sm {% if filtro == 'pendientes' %}btn-pc-primary{% else %}btn-pc-secondary{% endif %}">Pendientes</a>
+        <a href="?filtro=vencidos" class="btn btn-sm {% if filtro == 'vencidos' %}btn-pc-primary{% else %}btn-pc-secondary{% endif %}">Vencidos</a>
+    </div>
+
+    {% if recordatorios %}
+    <div class="table-responsive">
+        <table class="pc-table">
+            <thead>
+                <tr><th>Mascota</th><th>Tipo</th><th>Fecha</th><th>Estado</th><th>Notas</th><th class="text-end">Acciones</th></tr>
+            </thead>
+            <tbody>
+                {% for r in recordatorios %}
+                <tr>
+                    <td class="fw-semibold">{{ r.mascota.nombre }}</td>
+                    <td>
+                        {% if r.tipo == 'VAC' %}<span class="pc-badge pc-badge-vac">Vacunación</span>
+                        {% else %}<span class="pc-badge pc-badge-ctrl">Control</span>{% endif %}
+                    </td>
+                    <td>{{ r.fecha_programada|date:"d/m/Y" }}</td>
+                    <td>
+                        {% if r.enviado %}<span class="pc-badge pc-badge-ok">Enviado</span>
+                        {% elif r.fecha_programada < hoy %}<span class="pc-badge pc-badge-venc">Vencido</span>
+                        {% else %}<span class="pc-badge pc-badge-conf">Próximo</span>{% endif %}
+                    </td>
+                    <td class="text-muted small">{{ r.notas|default:"—"|truncatechars:60 }}</td>
+                    <td class="text-end">
+                        <div class="pc-actions">
+                            {% if not r.enviado %}
+                            <form method="post" action="{% url 'clinica:recordatorio_marcar_enviado' r.pk %}" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="pc-icon-btn" title="Marcar enviado"><i class="bi bi-check2"></i></button>
+                            </form>
+                            {% endif %}
+                            <a href="{% url 'clinica:recordatorio_update' r.pk %}" class="pc-icon-btn" title="Editar"><i class="bi bi-pencil"></i></a>
+                            <a href="{% url 'clinica:recordatorio_delete' r.pk %}" class="pc-icon-btn danger" title="Eliminar"><i class="bi bi-trash"></i></a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+        {% include "_empty_state.html" with mensaje="No hay recordatorios para mostrar." %}
+    {% endif %}
+</div>
+{% endblock %}

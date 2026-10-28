@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}{{ titulo }} — PetCare{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        {% include "_form.html" with form=form titulo=titulo submit_label=submit_label cancel_url=cancel_url %}
+    </div>
+    <div class="col-lg-4">
+        <div class="pc-card">
+            <h3 class="h6 mb-2"><i class="bi bi-info-circle me-1"></i> Reglas de negocio</h3>
+            <ul class="small text-muted mb-0 ps-3">
+                <li>No se puede agendar en el pasado.</li>
+                <li>La cita debe caer dentro de un bloque de disponibilidad del profesional.</li>
+                <li>No se puede solapar con otra cita activa del mismo profesional.</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

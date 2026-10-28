@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Citas — PetCare{% endblock %}
+{% block content %}
+<div class="pc-card">
+    <div class="pc-card-header">
+        <h2><i class="bi bi-calendar2-check me-2"></i>Citas</h2>
+        <a href="{% url 'clinica:cita_create' %}" class="btn btn-pc-primary btn-sm">
+            <i class="bi bi-plus-lg me-1"></i> Nueva Cita
+        </a>
+    </div>
+
+    {% if citas %}
+    <div class="table-responsive">
+        <table class="pc-table">
+            <thead>
+                <tr><th>Fecha</th><th>Mascota</th><th>Profesional</th><th>Duración</th><th>Estado</th><th class="text-end">Acciones</th></tr>
+            </thead>
+            <tbody>
+                {% for c in citas %}
+                <tr>
+                    <td>{{ c.fecha_hora|date:"d/m/Y H:i" }}</td>
+                    <td><a href="{% url 'clinica:cita_detail' c.pk %}" class="fw-semibold">{{ c.mascota.nombre }}</a></td>
+                    <td>{{ c.profesional.nombre }}</td>
+                    <td>{{ c.duracion_min }} min</td>
+                    <td>
+                        {% if c.estado == 'PEND' %}<span class="pc-badge pc-badge-pend">Pendiente</span>
+                        {% elif c.estado == 'CONF' %}<span class="pc-badge pc-badge-conf">Confirmada</span>
+                        {% elif c.estado == 'ATEN' %}<span class="pc-badge pc-badge-aten">Atendida</span>
+                        {% else %}<span class="pc-badge pc-badge-canc">Cancelada</span>{% endif %}
+                    </td>
+                    <td class="text-end">
+                        <div class="pc-actions">
+                            <a href="{% url 'clinica:cita_detail' c.pk %}" class="pc-icon-btn" title="Ver"><i class="bi bi-eye"></i></a>
+                            <a href="{% url 'clinica:cita_update' c.pk %}" class="pc-icon-btn" title="Editar"><i class="bi bi-pencil"></i></a>
+                            <a href="{% url 'clinica:cita_delete' c.pk %}" class="pc-icon-btn danger" title="Eliminar"><i class="bi bi-trash"></i></a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+        {% include "_empty_state.html" with mensaje="Aún no hay citas registradas." %}
+    {% endif %}
+</div>
+{% endblock %}

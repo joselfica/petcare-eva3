@@ -1,0 +1,54 @@
+{#
+============================================================================
+_form.html — Formulario genérico reutilizable
+----------------------------------------------------------------------------
+Renderiza cualquier ModelForm con estilo del design system. Uso:
+
+    {% include "_form.html" with form=form titulo="Nuevo Tutor" %}
+
+Los errores no asociados a un campo (`non_field_errors`) se muestran
+arriba, en un alert rojo.
+============================================================================
+#}
+<div class="pc-card">
+    <div class="pc-card-header">
+        <h2><i class="bi bi-pencil-square me-2"></i>{{ titulo|default:"Formulario" }}</h2>
+        <a href="{{ cancel_url|default:'javascript:history.back()' }}" class="btn btn-pc-secondary btn-sm">
+            <i class="bi bi-arrow-left me-1"></i> Volver
+        </a>
+    </div>
+
+    <form method="post" novalidate class="pc-form">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+            {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="row g-3">
+            {% for field in form %}
+            <div class="col-12 {% if field.field.widget.input_type == 'checkbox' %}col-md-6{% endif %}">
+                <label for="{{ field.id_for_label }}" class="form-label">
+                    {{ field.label }}{% if field.field.required %} <span class="text-danger">*</span>{% endif %}
+                </label>
+                {{ field }}
+                {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
+                {% if field.errors %}
+                <div class="invalid-feedback d-block">
+                    {% for error in field.errors %}{{ error }}{% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 mt-4">
+            <a href="{{ cancel_url|default:'javascript:history.back()' }}" class="btn btn-pc-secondary">Cancelar</a>
+            <button type="submit" class="btn btn-pc-primary">
+                <i class="bi bi-check2 me-1"></i> {{ submit_label|default:"Guardar" }}
+            </button>
+        </div>
+    </form>
+</div>

@@ -1,40 +1,118 @@
 {% extends "base.html" %}
 
-{#
-============================================================================
-home.html — Página de inicio del sistema
-----------------------------------------------------------------------------
-Archivo: templates/home.html
-Propósito:
-    Portada provisional mostrada tras el login. En la Fase 4 se
-    reemplazará por un dashboard con accesos a los módulos del sistema.
-============================================================================
-#}
-
-{% block title %}Inicio — PetCare{% endblock %}
+{% block title %}Dashboard — PetCare{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-12">
-        <div class="p-5 mb-4 bg-white rounded-3 shadow-sm">
-            <h1 class="display-6">🐾 Bienvenido(a) a PetCare</h1>
-            <p class="lead">
-                Sistema de gestión de citas y fichas médicas para la clínica
-                veterinaria PetCare.
-            </p>
-            <hr>
-            <p class="mb-0">
-                Usuario: <strong>{{ user.username }}</strong> ·
-                Rol: <strong>
-                    {% for g in user.groups.all %}{{ g.name }}{% if not forloop.last %}, {% endif %}{% empty %}Sin grupo{% endfor %}
-                </strong>
-            </p>
-        </div>
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h1 class="h3 mb-0">Dashboard</h1>
+        <p class="text-muted mb-0">Resumen operativo de la clínica</p>
+    </div>
+</div>
 
-        <div class="alert alert-info">
-            <strong>Fase 3 completada.</strong>
-            En la Fase 4 se agregarán las vistas CRUD de Tutores, Mascotas,
-            Citas, Fichas Clínicas y Recordatorios.
+{# KPIs ---------------------------------------------------------------- #}
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="pc-kpi">
+            <div class="pc-kpi-icon"><i class="bi bi-people"></i></div>
+            <div>
+                <div class="pc-kpi-value">{{ total_tutores }}</div>
+                <div class="pc-kpi-label">Tutores</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="pc-kpi">
+            <div class="pc-kpi-icon"><i class="bi bi-piggy-bank"></i></div>
+            <div>
+                <div class="pc-kpi-value">{{ total_mascotas }}</div>
+                <div class="pc-kpi-label">Mascotas</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="pc-kpi">
+            <div class="pc-kpi-icon"><i class="bi bi-calendar2-check"></i></div>
+            <div>
+                <div class="pc-kpi-value">{{ citas_hoy }}</div>
+                <div class="pc-kpi-label">Citas hoy</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="pc-kpi">
+            <div class="pc-kpi-icon"><i class="bi bi-hourglass-split"></i></div>
+            <div>
+                <div class="pc-kpi-value">{{ citas_pendientes }}</div>
+                <div class="pc-kpi-label">Citas pendientes</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    {# Próximas citas -------------------------------------------------- #}
+    <div class="col-lg-7">
+        <div class="pc-card h-100">
+            <div class="pc-card-header">
+                <h2><i class="bi bi-calendar-event me-2"></i>Próximas citas (7 días)</h2>
+                <a href="{% url 'clinica:cita_list' %}" class="btn btn-pc-secondary btn-sm">Ver todas</a>
+            </div>
+            {% if proximas_citas %}
+            <div class="table-responsive">
+                <table class="pc-table">
+                    <thead>
+                        <tr><th>Fecha</th><th>Mascota</th><th>Profesional</th><th>Estado</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for c in proximas_citas %}
+                        <tr>
+                            <td>{{ c.fecha_hora|date:"d/m H:i" }}</td>
+                            <td><a href="{% url 'clinica:cita_detail' c.pk %}">{{ c.mascota.nombre }}</a></td>
+                            <td>{{ c.profesional.nombre }}</td>
+                            <td>
+                                {% if c.estado == 'PEND' %}<span class="pc-badge pc-badge-pend">Pendiente</span>
+                                {% elif c.estado == 'CONF' %}<span class="pc-badge pc-badge-conf">Confirmada</span>
+                                {% elif c.estado == 'ATEN' %}<span class="pc-badge pc-badge-aten">Atendida</span>
+                                {% else %}<span class="pc-badge pc-badge-canc">Cancelada</span>{% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+                {% include "_empty_state.html" with mensaje="No hay citas en los próximos 7 días." %}
+            {% endif %}
+        </div>
+    </div>
+
+    {# Recordatorios pendientes ---------------------------------------- #}
+    <div class="col-lg-5">
+        <div class="pc-card h-100">
+            <div class="pc-card-header">
+                <h2><i class="bi bi-bell me-2"></i>Recordatorios próximos</h2>
+                <a href="{% url 'clinica:recordatorio_list' %}" class="btn btn-pc-secondary btn-sm">Ver todos</a>
+            </div>
+            {% if recordatorios_pendientes %}
+            <ul class="list-unstyled mb-0">
+                {% for r in recordatorios_pendientes %}
+                <li class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                    <div>
+                        <div class="fw-semibold">{{ r.mascota.nombre }}</div>
+                        <small class="text-muted">{{ r.get_tipo_display }} · {{ r.fecha_programada|date:"d/m/Y" }}</small>
+                    </div>
+                    {% if r.fecha_programada < today %}
+                        <span class="pc-badge pc-badge-venc">Vencido</span>
+                    {% else %}
+                        <span class="pc-badge pc-badge-ctrl">Próximo</span>
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+                {% include "_empty_state.html" with mensaje="Sin recordatorios próximos." %}
+            {% endif %}
         </div>
     </div>
 </div>

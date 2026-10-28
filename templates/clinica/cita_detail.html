@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Cita — PetCare{% endblock %}
+{% block content %}
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div class="pc-card">
+            <div class="pc-card-header">
+                <h2><i class="bi bi-calendar-event me-2"></i>Cita de {{ cita.mascota.nombre }}</h2>
+                <div class="pc-actions">
+                    <a href="{% url 'clinica:cita_update' cita.pk %}" class="btn btn-pc-secondary btn-sm">Editar</a>
+                    <a href="{% url 'clinica:cita_list' %}" class="btn btn-pc-secondary btn-sm">Volver</a>
+                </div>
+            </div>
+            <dl class="row mb-0">
+                <dt class="col-sm-4">Fecha y hora</dt><dd class="col-sm-8">{{ cita.fecha_hora|date:"d/m/Y H:i" }}</dd>
+                <dt class="col-sm-4">Duración</dt><dd class="col-sm-8">{{ cita.duracion_min }} minutos</dd>
+                <dt class="col-sm-4">Profesional</dt><dd class="col-sm-8">{{ cita.profesional.nombre }} — {{ cita.profesional.especialidad }}</dd>
+                <dt class="col-sm-4">Tutor</dt><dd class="col-sm-8">{{ cita.mascota.tutor.nombre }}</dd>
+                <dt class="col-sm-4">Motivo</dt><dd class="col-sm-8">{{ cita.motivo }}</dd>
+                <dt class="col-sm-4">Estado</dt>
+                <dd class="col-sm-8">
+                    {% if cita.estado == 'PEND' %}<span class="pc-badge pc-badge-pend">Pendiente</span>
+                    {% elif cita.estado == 'CONF' %}<span class="pc-badge pc-badge-conf">Confirmada</span>
+                    {% elif cita.estado == 'ATEN' %}<span class="pc-badge pc-badge-aten">Atendida</span>
+                    {% else %}<span class="pc-badge pc-badge-canc">Cancelada</span>{% endif %}
+                </dd>
+            </dl>
+        </div>
+    </div>
+
+    <div class="col-lg-5">
+        <div class="pc-card h-100">
+            <div class="pc-card-header">
+                <h3 class="h6 mb-0"><i class="bi bi-clipboard-pulse me-1"></i> Ficha clínica</h3>
+                {% if cita.ficha %}
+                    <a href="{% url 'clinica:ficha_update' cita.ficha.pk %}" class="btn btn-pc-secondary btn-sm">Editar</a>
+                {% else %}
+                    <a href="{% url 'clinica:ficha_create' cita.pk %}" class="btn btn-pc-primary btn-sm">
+                        <i class="bi bi-plus-lg me-1"></i> Crear ficha
+                    </a>
+                {% endif %}
+            </div>
+            {% if cita.ficha %}
+                <p><strong>Diagnóstico:</strong> {{ cita.ficha.diagnostico }}</p>
+                <p><strong>Tratamiento:</strong> {{ cita.ficha.tratamiento }}</p>
+                {% if cita.ficha.recetas %}<p><strong>Recetas:</strong> {{ cita.ficha.recetas }}</p>{% endif %}
+                {% if cita.ficha.examenes %}<p><strong>Exámenes:</strong> {{ cita.ficha.examenes }}</p>{% endif %}
+                <small class="text-muted">Creada el {{ cita.ficha.fecha_creacion|date:"d/m/Y H:i" }}</small>
+            {% else %}
+                {% include "_empty_state.html" with mensaje="Esta cita aún no tiene ficha clínica." %}
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
