@@ -1,0 +1,35 @@
+{% extends "admin/index.html" %}
+{% load i18n static %}
+
+{#
+============================================================================
+index.html — Dashboard de bienvenida del Django Admin
+----------------------------------------------------------------------------
+Archivo: templates/admin/index.html
+Propósito:
+    Sobreescribe la portada del Admin para mostrar un mensaje de
+    bienvenida y accesos rápidos a las secciones más usadas del sistema
+    PetCare. Conserva la estructura nativa del Admin (app_list) debajo.
+============================================================================
+#}
+
+{% block content %}
+<div class="module" style="padding: 20px; margin-bottom: 20px; background: #f8f9fa; border-left: 4px solid #417690;">
+    <h2 style="margin-top: 0;">🐾 Bienvenido(a) al Panel Clínico PetCare</h2>
+    <p>
+        Desde aquí puedes administrar <strong>Tutores</strong>,
+        <strong>Mascotas</strong>, <strong>Profesionales</strong>,
+        <strong>Citas</strong>, <strong>Fichas Clínicas</strong>,
+        <strong>Disponibilidades</strong> y <strong>Recordatorios</strong>.
+    </p>
+    <p style="margin-bottom: 0;">
+        <strong>Accesos rápidos:</strong>
+        <a href="{% url 'admin:clinica_cita_changelist' %}">Citas</a> ·
+        <a href="{% url 'admin:clinica_mascota_changelist' %}">Mascotas</a> ·
+        <a href="{% url 'admin:clinica_tutor_changelist' %}">Tutores</a> ·
+        <a href="{% url 'admin:clinica_recordatorio_changelist' %}">Recordatorios</a>
+    </p>
+</div>
+
+{{ block.super }}
+{% endblock %}
