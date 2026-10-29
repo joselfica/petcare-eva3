@@ -9,11 +9,49 @@
         <div class="pc-card">
             <h3 class="h6 mb-2"><i class="bi bi-info-circle me-1"></i> Reglas de negocio</h3>
             <ul class="small text-muted mb-0 ps-3">
+                <li>Selecciona al Tutor para filtrar sus mascotas.</li>
                 <li>No se puede agendar en el pasado.</li>
-                <li>La cita debe caer dentro de un bloque de disponibilidad del profesional.</li>
-                <li>No se puede solapar con otra cita activa del mismo profesional.</li>
+                <li>Debe estar dentro de la disponibilidad del profesional.</li>
+                <li>No se puede solapar con otra cita activa.</li>
             </ul>
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const tutorSelect = document.getElementById('id_tutor_filtro');
+    const mascotaSelect = document.getElementById('id_mascota');
+
+    if (!tutorSelect || !mascotaSelect) return;
+
+    // URL generada por Django (respeta el prefijo donde esté montada la app);
+    // el "0" final es un marcador que se reemplaza por el id del tutor.
+    const urlBase = "{% url 'clinica:api_mascotas_tutor' 0 %}";
+
+    tutorSelect.addEventListener('change', function () {
+        const tutorId = this.value;
+
+        // Limpiamos el select de mascotas
+        mascotaSelect.innerHTML = '<option value="">---------</option>';
+
+        if (!tutorId) return;
+
+        fetch(urlBase.replace(/0\/$/, tutorId + '/'))
+            .then(response => {
+                if (!response.ok) throw new Error('HTTP ' + response.status);
+                return response.json();
+            })
+            .then(data => {
+                data.forEach(mascota => {
+                    const option = document.createElement('option');
+                    option.value = mascota.id;
+                    option.textContent = `${mascota.nombre} (${mascota.especie})`;
+                    mascotaSelect.appendChild(option);
+                });
+            })
+            .catch(error => console.error('Error al cargar mascotas:', error));
+    });
+});
+</script>
 {% endblock %}

@@ -46,4 +46,7 @@ urlpatterns = [
     path('recordatorios/<int:pk>/editar/', views.RecordatorioUpdateView.as_view(), name='recordatorio_update'),
     path('recordatorios/<int:pk>/eliminar/', views.RecordatorioDeleteView.as_view(), name='recordatorio_delete'),
     path('recordatorios/<int:pk>/marcar-enviado/', views.recordatorio_marcar_enviado, name='recordatorio_marcar_enviado'),
+
+    # API auxiliar (filtro dinámico de mascotas por tutor en el formulario de citas)
+    path('api/mascotas/<int:tutor_id>/', views.api_mascotas_tutor, name='api_mascotas_tutor'),
 ]

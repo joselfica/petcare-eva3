@@ -13,7 +13,7 @@
     <div class="table-responsive">
         <table class="pc-table">
             <thead>
-                <tr><th>Nombre</th><th>Especie</th><th>Raza</th><th>Tutor</th><th class="text-end">Acciones</th></tr>
+                <tr><th>Nombre</th><th>Especie</th><th>Raza</th><th>Sexo</th><th>Tutor</th><th class="text-end">Acciones</th></tr>
             </thead>
             <tbody>
                 {% for m in mascotas %}
@@ -21,6 +21,7 @@
                     <td class="fw-semibold">{{ m.nombre }}</td>
                     <td>{{ m.get_especie_display }}</td>
                     <td>{{ m.raza|default:"—" }}</td>
+                    <td>{{ m.get_sexo_display|default:"—" }}</td>
                     <td>{{ m.tutor.nombre }}</td>
                     <td class="text-end">
                         <div class="pc-actions">

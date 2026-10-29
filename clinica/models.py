@@ -148,6 +148,20 @@ class Mascota(models.Model):
         help_text='Raza de la mascota (opcional).',
     )
 
+    # Sexo de la mascota (relevante clínicamente).
+    SEXO_MACHO = 'M'
+    SEXO_HEMBRA = 'H'
+    SEXO_CHOICES = [
+        (SEXO_MACHO, 'Macho'),
+        (SEXO_HEMBRA, 'Hembra'),
+    ]
+    sexo = models.CharField(
+        max_length=1,
+        choices=SEXO_CHOICES,
+        default=SEXO_MACHO,
+        verbose_name='Sexo',
+    )
+
     # Fecha de nacimiento para calcular edad y programar controles.
     fecha_nacimiento = models.DateField(
         verbose_name='Fecha de nacimiento',

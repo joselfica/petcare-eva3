@@ -1,5 +1,145 @@
 {% extends "base.html" %}
+
 {% block title %}{{ titulo }} — PetCare{% endblock %}
+
 {% block content %}
-{% include "_form.html" with form=form titulo=titulo submit_label=submit_label cancel_url=cancel_url %}
+<div class="container-fluid py-3">
+    <div class="row justify-content-center g-4">
+        <div class="col-12 col-xl-8">
+            <div class="pc-card h-100">
+                <div class="pc-card-header d-flex flex-wrap align-items-center justify-content-between gap-3">
+                    <div>
+                        <h2 class="h4 mb-1">
+                            <i class="bi bi-clipboard2-pulse me-2" aria-hidden="true"></i>{{ titulo }}
+                        </h2>
+                        <p class="text-muted small mb-0">Registra la información de la mascota y su tutor responsable.</p>
+                    </div>
+                    <a href="{% url 'clinica:mascota_list' %}" class="btn btn-pc-secondary btn-sm">
+                        <i class="bi bi-arrow-left me-1" aria-hidden="true"></i> Volver al listado
+                    </a>
+                </div>
+
+                <div class="p-3 p-md-4">
+                    <form method="post" novalidate class="pc-form">
+                        {% csrf_token %}
+
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger" role="alert">
+                                <div class="fw-semibold mb-1">No se pudo guardar el registro</div>
+                                {{ form.non_field_errors }}
+                            </div>
+                        {% endif %}
+
+                        <fieldset class="border-0 p-0 m-0 mb-4">
+                            <legend class="h6 text-muted mb-3 pb-2 border-bottom">
+                                <span class="badge rounded-pill text-bg-success me-2">1</span>
+                                Datos del paciente
+                            </legend>
+
+                            <div class="row g-3">
+                                <div class="col-12 col-md-6">
+                                    <label for="{{ form.nombre.id_for_label }}" class="form-label">
+                                        Nombre{% if form.nombre.field.required %} <span class="text-danger" aria-hidden="true">*</span><span class="visually-hidden">(obligatorio)</span>{% endif %}
+                                    </label>
+                                    {{ form.nombre }}
+                                    {% if form.nombre.help_text %}<div class="form-text">{{ form.nombre.help_text }}</div>{% endif %}
+                                    {% if form.nombre.errors %}<div class="invalid-feedback d-block">{{ form.nombre.errors }}</div>{% endif %}
+                                </div>
+
+                                <div class="col-12 col-sm-6 col-md-3">
+                                    <label for="{{ form.especie.id_for_label }}" class="form-label">
+                                        Especie{% if form.especie.field.required %} <span class="text-danger" aria-hidden="true">*</span><span class="visually-hidden">(obligatorio)</span>{% endif %}
+                                    </label>
+                                    {{ form.especie }}
+                                    {% if form.especie.errors %}<div class="invalid-feedback d-block">{{ form.especie.errors }}</div>{% endif %}
+                                </div>
+
+                                {% if form.sexo %}
+                                <div class="col-12 col-sm-6 col-md-3">
+                                    <label for="{{ form.sexo.id_for_label }}" class="form-label">
+                                        Sexo{% if form.sexo.field.required %} <span class="text-danger" aria-hidden="true">*</span><span class="visually-hidden">(obligatorio)</span>{% endif %}
+                                    </label>
+                                    {{ form.sexo }}
+                                    {% if form.sexo.errors %}<div class="invalid-feedback d-block">{{ form.sexo.errors }}</div>{% endif %}
+                                </div>
+                                {% endif %}
+
+                                <div class="col-12 col-md-6">
+                                    <label for="{{ form.raza.id_for_label }}" class="form-label">
+                                        Raza{% if form.raza.field.required %} <span class="text-danger" aria-hidden="true">*</span><span class="visually-hidden">(obligatorio)</span>{% endif %}
+                                    </label>
+                                    {{ form.raza }}
+                                    {% if form.raza.help_text %}<div class="form-text">{{ form.raza.help_text }}</div>{% endif %}
+                                    {% if form.raza.errors %}<div class="invalid-feedback d-block">{{ form.raza.errors }}</div>{% endif %}
+                                </div>
+
+                                <div class="col-12 col-md-6">
+                                    <label for="{{ form.fecha_nacimiento.id_for_label }}" class="form-label">
+                                        Fecha de nacimiento{% if form.fecha_nacimiento.field.required %} <span class="text-danger" aria-hidden="true">*</span><span class="visually-hidden">(obligatorio)</span>{% endif %}
+                                    </label>
+                                    {{ form.fecha_nacimiento }}
+                                    {% if form.fecha_nacimiento.help_text %}<div class="form-text">{{ form.fecha_nacimiento.help_text }}</div>{% endif %}
+                                    {% if form.fecha_nacimiento.errors %}<div class="invalid-feedback d-block">{{ form.fecha_nacimiento.errors }}</div>{% endif %}
+                                </div>
+                            </div>
+                        </fieldset>
+
+                        <fieldset class="border-0 p-0 m-0">
+                            <legend class="h6 text-muted mb-3 pb-2 border-bottom">
+                                <span class="badge rounded-pill text-bg-success me-2">2</span>
+                                Propietario o tutor
+                            </legend>
+
+                            <div class="row g-3">
+                                <div class="col-12 col-md-8">
+                                    <label for="{{ form.tutor.id_for_label }}" class="form-label">
+                                        Tutor responsable{% if form.tutor.field.required %} <span class="text-danger" aria-hidden="true">*</span><span class="visually-hidden">(obligatorio)</span>{% endif %}
+                                    </label>
+                                    {{ form.tutor }}
+                                    <div class="form-text">Selecciona a la persona responsable de la mascota. Si no está registrada, créala desde el menú principal.</div>
+                                    {% if form.tutor.errors %}<div class="invalid-feedback d-block">{{ form.tutor.errors }}</div>{% endif %}
+                                </div>
+                            </div>
+                        </fieldset>
+
+                        <div class="d-flex flex-column-reverse flex-sm-row justify-content-end gap-2 mt-4 pt-4 border-top">
+                            <a href="{% url 'clinica:mascota_list' %}" class="btn btn-pc-secondary">
+                                <i class="bi bi-x-circle me-1" aria-hidden="true"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-pc-primary">
+                                <i class="bi bi-check2-circle me-1" aria-hidden="true"></i>
+                                {{ submit_label|default:"Guardar mascota" }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <aside class="col-12 col-xl-4">
+            <div class="pc-card bg-light border-0 h-100 p-4 p-lg-5 d-flex flex-column justify-content-center align-items-center text-center">
+                <div class="rounded-circle bg-white shadow-sm d-flex align-items-center justify-content-center mb-3" style="width: 6rem; height: 6rem;" aria-hidden="true">
+                    <svg class="text-success" width="3.5rem" height="3.5rem" viewBox="0 0 64 64" fill="currentColor" style="opacity: .8;">
+                        <ellipse cx="13" cy="29" rx="6" ry="8.5" transform="rotate(-20 13 29)"/>
+                        <ellipse cx="26" cy="16" rx="6.5" ry="9"/>
+                        <ellipse cx="38" cy="16" rx="6.5" ry="9"/>
+                        <ellipse cx="51" cy="29" rx="6" ry="8.5" transform="rotate(20 51 29)"/>
+                        <path d="M32 30c-9 0-17 9-17 17 0 6 5 9 10 9 3 0 5-1 7-1s4 1 7 1c5 0 10-3 10-9 0-8-8-17-17-17z"/>
+                    </svg>
+                </div>
+                <h3 class="h5 text-dark">Ficha del paciente</h3>
+                <p class="text-muted small mb-4">Completa los datos para mantener la ficha de la mascota clara y actualizada.</p>
+                <div class="w-100 text-start small">
+                    <p class="mb-2"><i class="bi bi-check-circle text-success me-2" aria-hidden="true"></i>Revisa que el nombre esté bien escrito.</p>
+                    <p class="mb-2"><i class="bi bi-check-circle text-success me-2" aria-hidden="true"></i>Indica la especie y la raza cuando corresponda.</p>
+                    <p class="mb-0"><i class="bi bi-check-circle text-success me-2" aria-hidden="true"></i>Asocia la mascota con su tutor responsable.</p>
+                </div>
+                <div class="mt-4 pt-3 border-top w-100 text-muted small">
+                    <i class="bi bi-info-circle me-1" aria-hidden="true"></i>
+                    Los campos marcados con <span class="text-danger">*</span> son obligatorios.
+                </div>
+            </div>
+        </aside>
+    </div>
+</div>
 {% endblock %}

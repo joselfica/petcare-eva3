@@ -18,9 +18,12 @@ Seguridad:
 from datetime import date, timedelta
 
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
+from django.views.decorators.http import require_GET
 from django.views.generic import (
     CreateView, DeleteView, DetailView, ListView, TemplateView, UpdateView,
 )
@@ -215,7 +218,8 @@ class CitaListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         return (
             super().get_queryset()
-            .select_related('mascota', 'profesional')
+            # Agregamos mascota__tutor al select_related
+            .select_related('mascota', 'mascota__tutor', 'profesional')
             .order_by('-fecha_hora')
         )
 
@@ -444,3 +448,19 @@ def recordatorio_marcar_enviado(request, pk):
     recordatorio.save()
     messages.success(request, 'Recordatorio marcado como enviado.')
     return redirect('clinica:recordatorio_list')
+
+
+# ============================================================================
+# API AUXILIAR (filtro dinámico del formulario de citas)
+# ============================================================================
+@login_required
+@require_GET
+def api_mascotas_tutor(request, tutor_id):
+    """Retorna en JSON las mascotas de un tutor (para el filtro dinámico de citas)."""
+    mascotas = (
+        Mascota.objects
+        .filter(tutor_id=tutor_id)
+        .order_by('nombre')
+        .values('id', 'nombre', 'especie')
+    )
+    return JsonResponse(list(mascotas), safe=False)
