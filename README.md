@@ -56,6 +56,12 @@ El sistema define 3 roles con permisos diferenciados:
 | **Veterinario** | Mascotas, Citas, Fichas Clínicas y Recordatorios |
 | **Recepcionista** | Tutores, Mascotas y Citas (sin fichas clínicas) |
 
+### 🔒 Seguridad de Sesiones
+Para proteger la confidencialidad de las fichas clínicas, el sistema cuenta con un tiempo de expiración de sesión por inactividad. 
+*   **Expiración:** 60 minutos de inactividad.
+*   **Renovación:** Cada interacción del usuario (clic, recarga, envío de formulario) reinicia el contador.
+*   **Implementación:** Configurado en `settings.py` mediante `SESSION_COOKIE_AGE` y `SESSION_SAVE_EVERY_REQUEST`.
+
 Comando para crear los grupos y usuarios demo:
 ```powershell
 python manage.py crear_usuarios_demo

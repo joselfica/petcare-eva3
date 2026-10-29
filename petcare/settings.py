@@ -184,3 +184,21 @@ REST_FRAMEWORK = {
 # CLAVE PRIMARIA POR DEFECTO
 # ============================================================================
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# ============================================================================
+# SEGURIDAD DE SESIONES
+# ----------------------------------------------------------------------------
+# En un sistema clínico, es crucial que las sesiones expiren por inactividad
+# para proteger la privacidad de las fichas médicas.
+# SESSION_COOKIE_AGE: Tiempo de vida de la cookie de sesión en segundos.
+#   3600 = 60 minutos. (Puedes poner 1800 para 30 minutos).
+# SESSION_EXPIRE_AT_BROWSER_CLOSE: Si es True, la sesión muere al cerrar el
+#   navegador. Lo dejamos en False para que el usuario no pierda el trabajo si
+#   cierra la pestaña por error, pero la inactividad lo sacará.
+# SESSION_SAVE_EVERY_REQUEST: Si es True, el contador de expiración se reinicia
+#   cada vez que el usuario hace clic o recarga una página. Esto es ideal para
+#   medir "inactividad" real.
+# ============================================================================
+SESSION_COOKIE_AGE = 3600  # 60 minutos
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+SESSION_SAVE_EVERY_REQUEST = True
