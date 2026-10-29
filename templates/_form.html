@@ -1,4 +1,4 @@
-{#
+{% comment %}
 ============================================================================
 _form.html — Formulario genérico reutilizable
 ----------------------------------------------------------------------------
@@ -9,7 +9,7 @@ Renderiza cualquier ModelForm con estilo del design system. Uso:
 Los errores no asociados a un campo (`non_field_errors`) se muestran
 arriba, en un alert rojo.
 ============================================================================
-#}
+{% endcomment %}
 <div class="pc-card">
     <div class="pc-card-header">
         <h2><i class="bi bi-pencil-square me-2"></i>{{ titulo|default:"Formulario" }}</h2>
