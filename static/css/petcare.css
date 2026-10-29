@@ -112,20 +112,17 @@ a:hover { color: var(--pc-primary-dark); }
 .pc-icon-btn:hover { background: var(--pc-primary); color: #fff; border-color: var(--pc-primary); }
 .pc-icon-btn.danger:hover { background: #DC2626; border-color: #DC2626; }
 
-/* Badges de estado --------------------------------------------------- */
+/* Badges de estado (más vivos) --------------------------------------- */
 .pc-badge {
-    display: inline-block; padding: 0.25rem 0.6rem;
+    display: inline-flex; align-items: center;
+    padding: 0.3rem 0.6rem;
     font-size: 0.75rem; font-weight: 600; border-radius: 999px;
-    line-height: 1.4;
+    line-height: 1.2; border: 1px solid transparent;
 }
-.pc-badge-pend { background: #F3F4F6; color: #374151; }
-.pc-badge-conf { background: #DBEAFE; color: #1E40AF; }
-.pc-badge-aten { background: #D1FAE5; color: #065F46; }
-.pc-badge-canc { background: #FEE2E2; color: #991B1B; }
-.pc-badge-vac  { background: #EDE9FE; color: #5B21B6; }
-.pc-badge-ctrl { background: #FEF3C7; color: #92400E; }
-.pc-badge-ok   { background: #D1FAE5; color: #065F46; }
-.pc-badge-venc { background: #FEE2E2; color: #991B1B; }
+.pc-badge-pend { background: #FEF3C7; color: #92400E; border-color: #FDE68A; }
+.pc-badge-conf { background: #DBEAFE; color: #1E40AF; border-color: #BFDBFE; }
+.pc-badge-aten { background: #D1FAE5; color: #065F46; border-color: #A7F3D0; }
+.pc-badge-canc { background: #FEE2E2; color: #991B1B; border-color: #FECACA; }
 
 /* Formularios -------------------------------------------------------- */
 .pc-form .form-label { font-weight: 500; color: var(--pc-text); margin-bottom: 0.35rem; }
@@ -170,4 +167,21 @@ a:hover { color: var(--pc-primary-dark); }
     text-align: center; color: var(--pc-text-muted);
     padding: 1.5rem 0; margin-top: 3rem; font-size: 0.85rem;
     border-top: 1px solid var(--pc-border);
+}
+
+/* Animación del corazón en el logo ------------------------------------ */
+@keyframes latido {
+    0% { transform: scale(1); }
+    14% { transform: scale(1.15); }
+    28% { transform: scale(1); }
+    42% { transform: scale(1.15); }
+    70% { transform: scale(1); }
+}
+
+.corazon-latido {
+    display: inline-block;
+    animation: latido 2s infinite ease-in-out;
+    transform-origin: center;
+    /* Color ámbar para que resalte un poco sobre el fondo verde */
+    color: var(--pc-accent); 
 }
