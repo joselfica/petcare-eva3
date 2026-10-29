@@ -7,7 +7,9 @@
     base.html — Layout global PetCare
     ------------------------------------------------------------------------
     Incluye tipografía Inter, Bootstrap 5.3, Bootstrap Icons y el design
-    system `petcare.css`. Navbar con enlaces condicionales por sesión.
+    system `petcare.css`. Navbar con enlaces condicionales por sesión y
+    permisos (se ocultan los enlaces a los que el usuario no tiene acceso
+    para evitar 403).
     ========================================================================
     {% endcomment %}
     <meta charset="UTF-8">
@@ -22,13 +24,11 @@
     <link href="{% static 'css/petcare.css' %}" rel="stylesheet">
 </head>
 <body>
-    <!-- ... resto del código ... -->
-<body>
     <nav class="navbar navbar-expand-lg navbar-pc">
         <div class="container pc-container">
-<a class="navbar-brand text-white" href="{% url 'clinica:home' %}">
-    <i class="bi bi-heart-pulse-fill me-1 corazon-latido"></i> PetCare
-</a>
+            <a class="navbar-brand text-white" href="{% url 'clinica:home' %}">
+                <i class="bi bi-heart-pulse-fill me-1 corazon-latido"></i> PetCare
+            </a>
             <button class="navbar-toggler border-0 text-white" type="button"
                     data-bs-toggle="collapse" data-bs-target="#navPrincipal"
                     aria-controls="navPrincipal" aria-expanded="false" aria-label="Menú">
@@ -44,30 +44,42 @@
                             <i class="bi bi-speedometer2 me-1"></i> Dashboard
                         </a>
                     </li>
+
+                    {% if perms.clinica.view_tutor %}
                     <li class="nav-item">
                         <a class="nav-link {% if 'tutor' in request.resolver_match.url_name %}active{% endif %}"
                            href="{% url 'clinica:tutor_list' %}">
                             <i class="bi bi-people me-1"></i> Tutores
                         </a>
                     </li>
+                    {% endif %}
+
+                    {% if perms.clinica.view_mascota %}
                     <li class="nav-item">
                         <a class="nav-link {% if 'mascota' in request.resolver_match.url_name %}active{% endif %}"
                            href="{% url 'clinica:mascota_list' %}">
                             <i class="bi bi-piggy-bank me-1"></i> Mascotas
                         </a>
                     </li>
+                    {% endif %}
+
+                    {% if perms.clinica.view_cita %}
                     <li class="nav-item">
                         <a class="nav-link {% if 'cita' in request.resolver_match.url_name %}active{% endif %}"
                            href="{% url 'clinica:cita_list' %}">
                             <i class="bi bi-calendar2-check me-1"></i> Citas
                         </a>
                     </li>
+                    {% endif %}
+
+                    {% if perms.clinica.view_recordatorio %}
                     <li class="nav-item">
                         <a class="nav-link {% if 'recordatorio' in request.resolver_match.url_name %}active{% endif %}"
                            href="{% url 'clinica:recordatorio_list' %}">
                             <i class="bi bi-bell me-1"></i> Recordatorios
                         </a>
                     </li>
+                    {% endif %}
                     {% endif %}
                 </ul>
 

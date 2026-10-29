@@ -9,22 +9,30 @@ Propósito:
         - CRUD de Tutores, Mascotas, Citas, Fichas Clínicas y Recordatorios.
 
 Seguridad:
-    Todas las vistas heredan de LoginRequiredMixin. La validación de
-    reglas de negocio de Cita se dispara automáticamente vía ModelForm
-    (que llama full_clean()).
+    - Todas las CBV heredan de `StaffRequiredMixin`, que combina
+      LoginRequiredMixin + PermissionRequiredMixin con comportamiento
+      correcto:
+          * Anónimo                    -> 302 al login
+          * Autenticado sin permiso    -> 403 Forbidden
+    - Cada vista declara su `permission_required` (view_*, add_*, change_*,
+      delete_*) según corresponda.
+    - Las vistas basadas en función usan @login_required + @permission_required
+      con raise_exception=True.
+    - La validación de reglas de negocio de Cita se dispara automáticamente
+      vía ModelForm (que llama full_clean()).
 ============================================================================
 """
 
 from datetime import date, timedelta
 
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.core.exceptions import PermissionDenied
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
-from django.views.decorators.http import require_GET
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_GET, require_POST
 from django.views.generic import (
     CreateView, DeleteView, DetailView, ListView, TemplateView, UpdateView,
 )
@@ -38,10 +46,41 @@ from .models import (
 
 
 # ============================================================================
+# MIXIN PERSONALIZADO
+# ============================================================================
+class StaffRequiredMixin(LoginRequiredMixin, PermissionRequiredMixin):
+    """
+    Mixin que combina login + permiso con comportamiento correcto:
+      - Usuario anónimo          -> redirige al login (302).
+      - Usuario autenticado sin  -> devuelve 403 (PermissionDenied).
+        el permiso requerido
+
+    Si una subclase NO define `permission_required` (o lo deja vacío),
+    solo exige autenticación (útil para HomeView).
+    """
+
+    raise_exception = True
+
+    def has_permission(self):
+        # Si no se declaró permiso explícito, basta con estar autenticado.
+        if not getattr(self, 'permission_required', None):
+            return self.request.user.is_authenticated
+        return super().has_permission()
+
+    def handle_no_permission(self):
+        if self.request.user.is_authenticated:
+            raise PermissionDenied(self.get_permission_denied_message())
+        return super().handle_no_permission()
+
+
+# ============================================================================
 # HOME / DASHBOARD
 # ============================================================================
-class HomeView(LoginRequiredMixin, TemplateView):
-    """Dashboard con KPIs y recordatorios próximos."""
+class HomeView(StaffRequiredMixin, TemplateView):
+    """
+    Dashboard con KPIs y recordatorios próximos.
+    Requiere solo autenticación (no un permiso específico).
+    """
 
     template_name = 'home.html'
 
@@ -75,17 +114,19 @@ class HomeView(LoginRequiredMixin, TemplateView):
 # ============================================================================
 # TUTOR — CRUD
 # ============================================================================
-class TutorListView(LoginRequiredMixin, ListView):
+class TutorListView(StaffRequiredMixin, ListView):
     model = Tutor
     template_name = 'clinica/tutor_list.html'
     context_object_name = 'tutores'
     paginate_by = 20
+    permission_required = 'clinica.view_tutor'
 
 
-class TutorCreateView(LoginRequiredMixin, CreateView):
+class TutorCreateView(StaffRequiredMixin, CreateView):
     model = Tutor
     form_class = TutorForm
     template_name = 'clinica/tutor_form.html'
+    permission_required = 'clinica.add_tutor'
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -102,10 +143,11 @@ class TutorCreateView(LoginRequiredMixin, CreateView):
         return reverse('clinica:tutor_list')
 
 
-class TutorUpdateView(LoginRequiredMixin, UpdateView):
+class TutorUpdateView(StaffRequiredMixin, UpdateView):
     model = Tutor
     form_class = TutorForm
     template_name = 'clinica/tutor_form.html'
+    permission_required = 'clinica.change_tutor'
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -122,10 +164,11 @@ class TutorUpdateView(LoginRequiredMixin, UpdateView):
         return reverse('clinica:tutor_list')
 
 
-class TutorDeleteView(LoginRequiredMixin, DeleteView):
+class TutorDeleteView(StaffRequiredMixin, DeleteView):
     model = Tutor
     template_name = '_confirm_delete.html'
     success_url = reverse_lazy('clinica:tutor_list')
+    permission_required = 'clinica.delete_tutor'
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -141,20 +184,22 @@ class TutorDeleteView(LoginRequiredMixin, DeleteView):
 # ============================================================================
 # MASCOTA — CRUD
 # ============================================================================
-class MascotaListView(LoginRequiredMixin, ListView):
+class MascotaListView(StaffRequiredMixin, ListView):
     model = Mascota
     template_name = 'clinica/mascota_list.html'
     context_object_name = 'mascotas'
     paginate_by = 20
+    permission_required = 'clinica.view_mascota'
 
     def get_queryset(self):
         return super().get_queryset().select_related('tutor')
 
 
-class MascotaCreateView(LoginRequiredMixin, CreateView):
+class MascotaCreateView(StaffRequiredMixin, CreateView):
     model = Mascota
     form_class = MascotaForm
     template_name = 'clinica/mascota_form.html'
+    permission_required = 'clinica.add_mascota'
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -171,10 +216,11 @@ class MascotaCreateView(LoginRequiredMixin, CreateView):
         return reverse('clinica:mascota_list')
 
 
-class MascotaUpdateView(LoginRequiredMixin, UpdateView):
+class MascotaUpdateView(StaffRequiredMixin, UpdateView):
     model = Mascota
     form_class = MascotaForm
     template_name = 'clinica/mascota_form.html'
+    permission_required = 'clinica.change_mascota'
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -191,10 +237,11 @@ class MascotaUpdateView(LoginRequiredMixin, UpdateView):
         return reverse('clinica:mascota_list')
 
 
-class MascotaDeleteView(LoginRequiredMixin, DeleteView):
+class MascotaDeleteView(StaffRequiredMixin, DeleteView):
     model = Mascota
     template_name = '_confirm_delete.html'
     success_url = reverse_lazy('clinica:mascota_list')
+    permission_required = 'clinica.delete_mascota'
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -210,22 +257,22 @@ class MascotaDeleteView(LoginRequiredMixin, DeleteView):
 # ============================================================================
 # CITA — CRUD + REGLAS DE NEGOCIO
 # ============================================================================
-class CitaListView(LoginRequiredMixin, ListView):
+class CitaListView(StaffRequiredMixin, ListView):
     model = Cita
     template_name = 'clinica/cita_list.html'
     context_object_name = 'citas'
     paginate_by = 20
+    permission_required = 'clinica.view_cita'
 
     def get_queryset(self):
         return (
             super().get_queryset()
-            # Agregamos mascota__tutor al select_related
             .select_related('mascota', 'mascota__tutor', 'profesional')
             .order_by('-fecha_hora')
         )
 
 
-class CitaCreateView(LoginRequiredMixin, CreateView):
+class CitaCreateView(StaffRequiredMixin, CreateView):
     """
     Crear cita. La validación anti-solapamiento / disponibilidad / fecha
     pasada se dispara automáticamente porque `CitaForm` es un ModelForm
@@ -235,6 +282,7 @@ class CitaCreateView(LoginRequiredMixin, CreateView):
     model = Cita
     form_class = CitaForm
     template_name = 'clinica/cita_form.html'
+    permission_required = 'clinica.add_cita'
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -251,10 +299,11 @@ class CitaCreateView(LoginRequiredMixin, CreateView):
         return reverse('clinica:cita_list')
 
 
-class CitaUpdateView(LoginRequiredMixin, UpdateView):
+class CitaUpdateView(StaffRequiredMixin, UpdateView):
     model = Cita
     form_class = CitaForm
     template_name = 'clinica/cita_form.html'
+    permission_required = 'clinica.change_cita'
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -271,21 +320,23 @@ class CitaUpdateView(LoginRequiredMixin, UpdateView):
         return reverse('clinica:cita_list')
 
 
-class CitaDetailView(LoginRequiredMixin, DetailView):
+class CitaDetailView(StaffRequiredMixin, DetailView):
     """Detalle de una cita con su ficha clínica si existe."""
 
     model = Cita
     template_name = 'clinica/cita_detail.html'
     context_object_name = 'cita'
+    permission_required = 'clinica.view_cita'
 
     def get_queryset(self):
         return super().get_queryset().select_related('mascota', 'profesional')
 
 
-class CitaDeleteView(LoginRequiredMixin, DeleteView):
+class CitaDeleteView(StaffRequiredMixin, DeleteView):
     model = Cita
     template_name = '_confirm_delete.html'
     success_url = reverse_lazy('clinica:cita_list')
+    permission_required = 'clinica.delete_cita'
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -301,7 +352,7 @@ class CitaDeleteView(LoginRequiredMixin, DeleteView):
 # ============================================================================
 # FICHA CLÍNICA — Crear / Editar (asociada a una Cita)
 # ============================================================================
-class FichaCreateView(LoginRequiredMixin, CreateView):
+class FichaCreateView(StaffRequiredMixin, CreateView):
     """
     Crea la ficha clínica de una cita. Al guardar, la señal
     `crear_recordatorio_control` (signals.py) genera automáticamente un
@@ -311,6 +362,7 @@ class FichaCreateView(LoginRequiredMixin, CreateView):
     model = FichaClinica
     form_class = FichaClinicaForm
     template_name = 'clinica/ficha_form.html'
+    permission_required = 'clinica.add_fichaclinica'
 
     def dispatch(self, request, *args, **kwargs):
         self.cita = get_object_or_404(Cita, pk=kwargs['cita_pk'])
@@ -332,10 +384,11 @@ class FichaCreateView(LoginRequiredMixin, CreateView):
         return reverse('clinica:cita_detail', args=[self.cita.pk])
 
 
-class FichaUpdateView(LoginRequiredMixin, UpdateView):
+class FichaUpdateView(StaffRequiredMixin, UpdateView):
     model = FichaClinica
     form_class = FichaClinicaForm
     template_name = 'clinica/ficha_form.html'
+    permission_required = 'clinica.change_fichaclinica'
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -355,11 +408,12 @@ class FichaUpdateView(LoginRequiredMixin, UpdateView):
 # ============================================================================
 # RECORDATORIO — Listar / Crear / Editar / Eliminar / Marcar enviado
 # ============================================================================
-class RecordatorioListView(LoginRequiredMixin, ListView):
+class RecordatorioListView(StaffRequiredMixin, ListView):
     model = Recordatorio
     template_name = 'clinica/recordatorio_list.html'
     context_object_name = 'recordatorios'
     paginate_by = 20
+    permission_required = 'clinica.view_recordatorio'
 
     def get_queryset(self):
         qs = super().get_queryset().select_related('mascota', 'mascota__tutor')
@@ -377,10 +431,11 @@ class RecordatorioListView(LoginRequiredMixin, ListView):
         return ctx
 
 
-class RecordatorioCreateView(LoginRequiredMixin, CreateView):
+class RecordatorioCreateView(StaffRequiredMixin, CreateView):
     model = Recordatorio
     form_class = RecordatorioForm
     template_name = 'clinica/recordatorio_form.html'
+    permission_required = 'clinica.add_recordatorio'
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -397,10 +452,11 @@ class RecordatorioCreateView(LoginRequiredMixin, CreateView):
         return reverse('clinica:recordatorio_list')
 
 
-class RecordatorioUpdateView(LoginRequiredMixin, UpdateView):
+class RecordatorioUpdateView(StaffRequiredMixin, UpdateView):
     model = Recordatorio
     form_class = RecordatorioForm
     template_name = 'clinica/recordatorio_form.html'
+    permission_required = 'clinica.change_recordatorio'
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -417,10 +473,11 @@ class RecordatorioUpdateView(LoginRequiredMixin, UpdateView):
         return reverse('clinica:recordatorio_list')
 
 
-class RecordatorioDeleteView(LoginRequiredMixin, DeleteView):
+class RecordatorioDeleteView(StaffRequiredMixin, DeleteView):
     model = Recordatorio
     template_name = '_confirm_delete.html'
     success_url = reverse_lazy('clinica:recordatorio_list')
+    permission_required = 'clinica.delete_recordatorio'
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -433,28 +490,46 @@ class RecordatorioDeleteView(LoginRequiredMixin, DeleteView):
         return super().form_valid(form)
 
 
+# ============================================================================
+# ACCIONES RÁPIDAS (basadas en función)
+# ============================================================================
+@login_required
+@permission_required('clinica.change_recordatorio', raise_exception=True)
+@require_POST
 def recordatorio_marcar_enviado(request, pk):
     """
     Acción rápida: marca un recordatorio como enviado y vuelve al listado.
-
-    Se implementa como función (no CBV) porque es una acción puntual de
-    POST sobre un recurso. Requiere autenticación.
+    Requiere login + permiso de cambio de recordatorio.
     """
-    if not request.user.is_authenticated:
-        return redirect('login')
-    if request.method != 'POST':
-        return redirect('clinica:recordatorio_list')
     recordatorio = get_object_or_404(Recordatorio, pk=pk)
     recordatorio.enviado = True
     recordatorio.save()
-    messages.success(request, 'Recordatorio marcado como enviado.')
+    messages.success(self.request, 'Recordatorio marcado como enviado.')
     return redirect('clinica:recordatorio_list')
+
+
+@login_required
+@permission_required('clinica.change_cita', raise_exception=True)
+@require_POST
+def cita_confirmar_rapido(request, pk):
+    """
+    Cambia el estado de una cita a 'Confirmada' directamente desde el listado.
+    Se ejecuta mediante un formulario POST para evitar cambios accidentales.
+    Requiere login + permiso de cambio de cita.
+    """
+    cita = get_object_or_404(Cita, pk=pk)
+    if cita.estado == Cita.ESTADO_PENDIENTE:
+        cita.estado = Cita.ESTADO_CONFIRMADA
+        cita.save()
+        messages.success(self.request, f'Cita de {cita.mascota.nombre} confirmada exitosamente.')
+    return redirect('clinica:cita_list')
 
 
 # ============================================================================
 # API AUXILIAR (filtro dinámico del formulario de citas)
 # ============================================================================
 @login_required
+@permission_required('clinica.view_cita', raise_exception=True)
 @require_GET
 def api_mascotas_tutor(request, tutor_id):
     """Retorna en JSON las mascotas de un tutor (para el filtro dinámico de citas)."""
@@ -465,17 +540,3 @@ def api_mascotas_tutor(request, tutor_id):
         .values('id', 'nombre', 'especie')
     )
     return JsonResponse(list(mascotas), safe=False)
-
-
-@require_POST
-def cita_confirmar_rapido(request, pk):
-    """
-    Cambia el estado de una cita a 'Confirmada' directamente desde el listado.
-    Se ejecuta mediante un formulario POST para evitar cambios accidentales.
-    """
-    cita = get_object_or_404(Cita, pk=pk)
-    if cita.estado == Cita.ESTADO_PENDIENTE:
-        cita.estado = Cita.ESTADO_CONFIRMADA
-        cita.save()
-        messages.success(request, f'Cita de {cita.mascota.nombre} confirmada exitosamente.')
-    return redirect('clinica:cita_list')
