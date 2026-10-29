@@ -30,12 +30,22 @@
                         {% else %}<span class="pc-badge pc-badge-canc">Cancelada</span>{% endif %}
                     </td>
                     <td class="text-end">
-                        <div class="pc-actions">
-                            <a href="{% url 'clinica:cita_detail' c.pk %}" class="pc-icon-btn" title="Ver"><i class="bi bi-eye"></i></a>
-                            <a href="{% url 'clinica:cita_update' c.pk %}" class="pc-icon-btn" title="Editar"><i class="bi bi-pencil"></i></a>
-                            <a href="{% url 'clinica:cita_delete' c.pk %}" class="pc-icon-btn danger" title="Eliminar"><i class="bi bi-trash"></i></a>
-                        </div>
-                    </td>
+    <div class="pc-actions">
+        <!-- BOTÓN NUEVO: Confirmar rápido -->
+        {% if c.estado == 'PEND' %}
+        <form method="post" action="{% url 'clinica:cita_confirmar' c.pk %}" class="d-inline" title="Confirmar cita">
+            {% csrf_token %}
+            <button type="submit" class="pc-icon-btn text-success" style="border-color: #A7F3D0; background-color: #D1FAE5;">
+                <i class="bi bi-check-lg"></i>
+            </button>
+        </form>
+        {% endif %}
+
+        <a href="{% url 'clinica:cita_detail' c.pk %}" class="pc-icon-btn" title="Ver"><i class="bi bi-eye"></i></a>
+        <a href="{% url 'clinica:cita_update' c.pk %}" class="pc-icon-btn" title="Editar"><i class="bi bi-pencil"></i></a>
+        <a href="{% url 'clinica:cita_delete' c.pk %}" class="pc-icon-btn danger" title="Eliminar"><i class="bi bi-trash"></i></a>
+    </div>
+</td>
                 </tr>
                 {% endfor %}
             </tbody>

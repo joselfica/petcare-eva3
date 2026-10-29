@@ -24,6 +24,7 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
 from django.views.decorators.http import require_GET
+from django.views.decorators.http import require_POST
 from django.views.generic import (
     CreateView, DeleteView, DetailView, ListView, TemplateView, UpdateView,
 )
@@ -464,3 +465,17 @@ def api_mascotas_tutor(request, tutor_id):
         .values('id', 'nombre', 'especie')
     )
     return JsonResponse(list(mascotas), safe=False)
+
+
+@require_POST
+def cita_confirmar_rapido(request, pk):
+    """
+    Cambia el estado de una cita a 'Confirmada' directamente desde el listado.
+    Se ejecuta mediante un formulario POST para evitar cambios accidentales.
+    """
+    cita = get_object_or_404(Cita, pk=pk)
+    if cita.estado == Cita.ESTADO_PENDIENTE:
+        cita.estado = Cita.ESTADO_CONFIRMADA
+        cita.save()
+        messages.success(request, f'Cita de {cita.mascota.nombre} confirmada exitosamente.')
+    return redirect('clinica:cita_list')
