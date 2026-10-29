@@ -32,22 +32,44 @@
         <div class="pc-card h-100">
             <div class="pc-card-header">
                 <h3 class="h6 mb-0"><i class="bi bi-clipboard-pulse me-1"></i> Ficha clínica</h3>
-                {% if cita.ficha %}
-                    <a href="{% url 'clinica:ficha_update' cita.ficha.pk %}" class="btn btn-pc-secondary btn-sm">Editar</a>
-                {% else %}
-                    <a href="{% url 'clinica:ficha_create' cita.pk %}" class="btn btn-pc-primary btn-sm">
-                        <i class="bi bi-plus-lg me-1"></i> Crear ficha
-                    </a>
+                
+                {# Solo el veterinario/admin puede crear o editar #}
+                {% if perms.clinica.add_fichaclinica %}
+                    {% if cita.ficha %}
+                        <a href="{% url 'clinica:ficha_update' cita.ficha.pk %}" class="btn btn-pc-secondary btn-sm">Editar</a>
+                    {% else %}
+                        <a href="{% url 'clinica:ficha_create' cita.pk %}" class="btn btn-pc-primary btn-sm">
+                            <i class="bi bi-plus-lg me-1"></i> Crear ficha
+                        </a>
+                    {% endif %}
                 {% endif %}
             </div>
+
             {% if cita.ficha %}
-                <p><strong>Diagnóstico:</strong> {{ cita.ficha.diagnostico }}</p>
-                <p><strong>Tratamiento:</strong> {{ cita.ficha.tratamiento }}</p>
-                {% if cita.ficha.recetas %}<p><strong>Recetas:</strong> {{ cita.ficha.recetas }}</p>{% endif %}
-                {% if cita.ficha.examenes %}<p><strong>Exámenes:</strong> {{ cita.ficha.examenes }}</p>{% endif %}
-                <small class="text-muted">Creada el {{ cita.ficha.fecha_creacion|date:"d/m/Y H:i" }}</small>
+                {# Si tiene permiso, ve los datos. Si no, no. #}
+                {% if perms.clinica.view_fichaclinica %}
+                    <p><strong>Diagnóstico:</strong> {{ cita.ficha.diagnostico }}</p>
+                    <p><strong>Tratamiento:</strong> {{ cita.ficha.tratamiento }}</p>
+                    {% if cita.ficha.recetas %}<p><strong>Recetas:</strong> {{ cita.ficha.recetas }}</p>{% endif %}
+                    {% if cita.ficha.examenes %}<p><strong>Exámenes:</strong> {{ cita.ficha.examenes }}</p>{% endif %}
+                    <small class="text-muted">Creada el {{ cita.ficha.fecha_creacion|date:"d/m/Y H:i" }}</small>
+                {% else %}
+                    <div class="pc-empty">
+                        <i class="bi bi-lock"></i>
+                        <p class="mb-1">Ficha clínica confidencial.</p>
+                        <small>Solo el personal médico puede ver estos detalles.</small>
+                    </div>
+                {% endif %}
             {% else %}
-                {% include "_empty_state.html" with mensaje="Esta cita aún no tiene ficha clínica." %}
+                {% if perms.clinica.add_fichaclinica %}
+                    {% include "_empty_state.html" with mensaje="Esta cita aún no tiene ficha clínica." %}
+                {% else %}
+                    <div class="pc-empty">
+                        <i class="bi bi-lock"></i>
+                        <p class="mb-1">Sin ficha clínica.</p>
+                        <small>Solo el personal médico puede crearla.</small>
+                    </div>
+                {% endif %}
             {% endif %}
         </div>
     </div>

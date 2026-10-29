@@ -128,12 +128,13 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS(f'  ✓ Grupo "{g_vet.name}" con {g_vet.permissions.count()} permisos'))
 
         # ------------------------------------------------------------------
-        # Grupo Recepcionista
+        # Grupo Recepcionista: Tutores, Mascotas y Citas (SIN fichas clínicas)
         # ------------------------------------------------------------------
         permisos_rec = (
             self._permisos_de(Tutor) |
             self._permisos_de(Mascota) |
             self._permisos_de(Cita)
+            # Nota: No se incluye FichaClinica ni Recordatorio por privacidad clínica.
         )
         g_rec = self._crear_grupo('Recepcionista', permisos_rec)
         self.stdout.write(self.style.SUCCESS(f'  ✓ Grupo "{g_rec.name}" con {g_rec.permissions.count()} permisos'))

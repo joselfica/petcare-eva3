@@ -43,7 +43,9 @@
 
         <a href="{% url 'clinica:cita_detail' c.pk %}" class="pc-icon-btn" title="Ver"><i class="bi bi-eye"></i></a>
         <a href="{% url 'clinica:cita_update' c.pk %}" class="pc-icon-btn" title="Editar"><i class="bi bi-pencil"></i></a>
+        {% if perms.clinica.delete_cita %}
         <a href="{% url 'clinica:cita_delete' c.pk %}" class="pc-icon-btn danger" title="Eliminar"><i class="bi bi-trash"></i></a>
+        {% endif %}
     </div>
 </td>
                 </tr>
