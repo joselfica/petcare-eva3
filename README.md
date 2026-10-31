@@ -2,7 +2,7 @@
 
 **Evaluación Parcial N°3 — Desarrollo Backend (INACAP)**
 * **Docente:** Marcelo Alvarado Aravena
-* **Estudiante:** José L. Fica *(ajusta tu nombre si es necesario)*
+* **Estudiante:** José L. Fica
 * **Ponderación:** 30% de la nota final
 
 ---
