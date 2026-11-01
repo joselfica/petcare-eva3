@@ -27,6 +27,15 @@ El sistema centraliza la operación clínica permitiendo la administración de t
 
 ---
 
+## ☁️ Despliegue en AWS EC2 (Aplicación en Vivo)
+
+* **IP Pública (AWS):** [http://34.199.34.121/](http://34.199.34.121/)
+* **Panel de Administración:** [http://34.199.34.121/admin/](http://34.199.34.121/admin/)
+* **Arquitectura en EC2:** Nginx (puerto 80) -> Gunicorn (socket unix) -> Django -> PostgreSQL (localhost).
+* **Archivos estáticos:** Servidos por Nginx desde `/home/ubuntu/petcare-eva3/staticfiles/`.
+
+---
+
 ## ⚙️ Funcionalidades Clave
 
 1. **Gestión de Entidades:** CRUD completo de Tutores, Mascotas, Profesionales y Disponibilidades.
