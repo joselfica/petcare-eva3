@@ -37,6 +37,34 @@ class TutorForm(forms.ModelForm):
             'direccion': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
         }
 
+    def clean_rut(self):
+        rut = self.cleaned_data.get('rut')
+        if not rut:
+            return rut
+
+        # Normalizar: quitar puntos, guiones y espacios; mayúscula para la K
+        limpio = rut.replace('.', '').replace('-', '').replace(' ', '').upper()
+
+        if len(limpio) < 2 or not limpio[:-1].isdigit():
+            raise forms.ValidationError('RUT inválido. Ejemplo: 12.345.678-5')
+
+        cuerpo, dv = limpio[:-1], limpio[-1]
+
+        # Módulo 11: multiplicadores 2..7 de derecha a izquierda
+        suma = 0
+        multiplicador = 2
+        for digito in reversed(cuerpo):
+            suma += int(digito) * multiplicador
+            multiplicador = 2 if multiplicador == 7 else multiplicador + 1
+
+        resto = 11 - (suma % 11)
+        esperado = '0' if resto == 11 else 'K' if resto == 10 else str(resto)
+
+        if dv != esperado:
+            raise forms.ValidationError('RUT inválido: el dígito verificador no coincide.')
+
+        return f'{cuerpo}-{dv}'
+
 
 class MascotaForm(forms.ModelForm):
     """Formulario de creación/edición de Mascotas."""

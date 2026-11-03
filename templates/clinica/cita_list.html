@@ -9,6 +9,25 @@
         </a>
     </div>
 
+<form method="get" class="row g-2 mb-4">
+    <div class="col-md-6">
+        <input type="text" name="q" class="form-control" placeholder="Buscar mascota, tutor o profesional..." value="{{ q }}">
+    </div>
+    <div class="col-md-4">
+        <select name="estado" class="form-select">
+            <option value="">Todos los estados</option>
+            <option value="PEND" {% if estado == 'PEND' %}selected{% endif %}>Pendientes</option>
+            <option value="CONF" {% if estado == 'CONF' %}selected{% endif %}>Confirmadas</option>
+            <option value="ATEN" {% if estado == 'ATEN' %}selected{% endif %}>Atendidas</option>
+            <option value="CANC" {% if estado == 'CANC' %}selected{% endif %}>Canceladas</option>
+        </select>
+    </div>
+    <div class="col-md-2 d-flex gap-1">
+        <button type="submit" class="btn btn-pc-primary w-100"><i class="bi bi-search"></i></button>
+        {% if q or estado %}<a href="{% url 'clinica:cita_list' %}" class="btn btn-pc-secondary"><i class="bi bi-x-lg"></i></a>{% endif %}
+    </div>
+</form>
+
     {% if citas %}
     <div class="table-responsive">
         <table class="pc-table">
@@ -53,6 +72,24 @@
             </tbody>
         </table>
     </div>
+
+{% if is_paginated %}
+<nav class="mt-4">
+    <ul class="pagination justify-content-end mb-0">
+        {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{ q }}{% endif %}{% if estado %}&estado={{ estado }}{% endif %}">Anterior</a>
+            </li>
+        {% endif %}
+        <li class="page-item active"><span class="page-link">{{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span></li>
+        {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q }}{% endif %}{% if estado %}&estado={{ estado }}{% endif %}">Siguiente</a>
+            </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
     {% else %}
         {% include "_empty_state.html" with mensaje="Aún no hay citas registradas." %}
     {% endif %}

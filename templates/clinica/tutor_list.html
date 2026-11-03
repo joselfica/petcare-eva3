@@ -9,6 +9,12 @@
         </a>
     </div>
 
+<form method="get" class="d-flex gap-2 mb-4">
+    <input type="text" name="q" class="form-control" placeholder="Buscar por nombre, RUT o email..." value="{{ q }}">
+    <button type="submit" class="btn btn-pc-primary"><i class="bi bi-search"></i></button>
+    {% if q %}<a href="{% url 'clinica:tutor_list' %}" class="btn btn-pc-secondary">Limpiar</a>{% endif %}
+</form>
+
     {% if tutores %}
     <div class="table-responsive">
         <table class="pc-table">
@@ -34,6 +40,24 @@
             </tbody>
         </table>
     </div>
+
+{% if is_paginated %}
+<nav class="mt-4">
+    <ul class="pagination justify-content-end mb-0">
+        {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{ q }}{% endif %}">Anterior</a>
+            </li>
+        {% endif %}
+        <li class="page-item active"><span class="page-link">{{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span></li>
+        {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q }}{% endif %}">Siguiente</a>
+            </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
     {% else %}
         {% include "_empty_state.html" with mensaje="Aún no hay tutores registrados." accion_url=create_url accion_label="Crear primer tutor" %}
     {% endif %}

@@ -9,6 +9,24 @@
         </a>
     </div>
 
+<form method="get" class="row g-2 mb-4">
+    <div class="col-md-7">
+        <input type="text" name="q" class="form-control" placeholder="Buscar mascota o tutor..." value="{{ q }}">
+    </div>
+    <div class="col-md-3">
+        <select name="especie" class="form-select">
+            <option value="">Todas las especies</option>
+            <option value="PERRO" {% if especie == 'PERRO' %}selected{% endif %}>Perro</option>
+            <option value="GATO" {% if especie == 'GATO' %}selected{% endif %}>Gato</option>
+            <option value="OTRO" {% if especie == 'OTRO' %}selected{% endif %}>Otro</option>
+        </select>
+    </div>
+    <div class="col-md-2 d-flex gap-1">
+        <button type="submit" class="btn btn-pc-primary w-100"><i class="bi bi-search"></i></button>
+        {% if q or especie %}<a href="{% url 'clinica:mascota_list' %}" class="btn btn-pc-secondary"><i class="bi bi-x-lg"></i></a>{% endif %}
+    </div>
+</form>
+
     {% if mascotas %}
     <div class="table-responsive">
         <table class="pc-table">
@@ -18,7 +36,7 @@
             <tbody>
                 {% for m in mascotas %}
                 <tr>
-                    <td class="fw-semibold">{{ m.nombre }}</td>
+                    <td><a href="{% url 'clinica:mascota_detail' m.pk %}" class="fw-semibold text-decoration-none">{{ m.nombre }}</a></td>
                     <td>{{ m.get_especie_display }}</td>
                     <td>{{ m.raza|default:"—" }}</td>
                     <td>{{ m.get_sexo_display|default:"—" }}</td>
@@ -34,6 +52,24 @@
             </tbody>
         </table>
     </div>
+
+{% if is_paginated %}
+<nav class="mt-4">
+    <ul class="pagination justify-content-end mb-0">
+        {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{ q }}{% endif %}{% if especie %}&especie={{ especie }}{% endif %}">Anterior</a>
+            </li>
+        {% endif %}
+        <li class="page-item active"><span class="page-link">{{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span></li>
+        {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q }}{% endif %}{% if especie %}&especie={{ especie }}{% endif %}">Siguiente</a>
+            </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
     {% else %}
         {% include "_empty_state.html" with mensaje="Aún no hay mascotas registradas." %}
     {% endif %}

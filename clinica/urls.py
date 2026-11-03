@@ -28,6 +28,7 @@ urlpatterns = [
     path('mascotas/nueva/', views.MascotaCreateView.as_view(), name='mascota_create'),
     path('mascotas/<int:pk>/editar/', views.MascotaUpdateView.as_view(), name='mascota_update'),
     path('mascotas/<int:pk>/eliminar/', views.MascotaDeleteView.as_view(), name='mascota_delete'),
+    path('mascotas/<int:pk>/', views.MascotaDetailView.as_view(), name='mascota_detail'),
 
     # Citas
     path('citas/', views.CitaListView.as_view(), name='cita_list'),

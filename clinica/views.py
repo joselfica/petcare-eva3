@@ -29,9 +29,11 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.core.exceptions import PermissionDenied
+from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
+from django.utils import timezone
 from django.views.decorators.http import require_GET, require_POST
 from django.views.generic import (
     CreateView, DeleteView, DetailView, ListView, TemplateView, UpdateView,
@@ -76,12 +78,8 @@ class StaffRequiredMixin(LoginRequiredMixin, PermissionRequiredMixin):
 # ============================================================================
 # HOME / DASHBOARD
 # ============================================================================
-class HomeView(StaffRequiredMixin, TemplateView):
-    """
-    Dashboard con KPIs y recordatorios próximos.
-    Requiere solo autenticación (no un permiso específico).
-    """
-
+class HomeView(LoginRequiredMixin, TemplateView):
+    """Dashboard con KPIs y recordatorios próximos."""
     template_name = 'home.html'
 
     def get_context_data(self, **kwargs):
@@ -114,12 +112,28 @@ class HomeView(StaffRequiredMixin, TemplateView):
 # ============================================================================
 # TUTOR — CRUD
 # ============================================================================
-class TutorListView(StaffRequiredMixin, ListView):
+class TutorListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     model = Tutor
     template_name = 'clinica/tutor_list.html'
     context_object_name = 'tutores'
-    paginate_by = 20
+    paginate_by = 10
     permission_required = 'clinica.view_tutor'
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        q = self.request.GET.get('q')
+        if q:
+            qs = qs.filter(
+                Q(nombre__icontains=q) | 
+                Q(rut__icontains=q) | 
+                Q(email__icontains=q)
+            )
+        return qs.order_by('nombre')
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['q'] = self.request.GET.get('q', '')
+        return ctx
 
 
 class TutorCreateView(StaffRequiredMixin, CreateView):
@@ -184,15 +198,34 @@ class TutorDeleteView(StaffRequiredMixin, DeleteView):
 # ============================================================================
 # MASCOTA — CRUD
 # ============================================================================
-class MascotaListView(StaffRequiredMixin, ListView):
+class MascotaListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     model = Mascota
     template_name = 'clinica/mascota_list.html'
     context_object_name = 'mascotas'
-    paginate_by = 20
+    paginate_by = 10
     permission_required = 'clinica.view_mascota'
 
     def get_queryset(self):
-        return super().get_queryset().select_related('tutor')
+        qs = super().get_queryset().select_related('tutor')
+        q = self.request.GET.get('q')
+        especie = self.request.GET.get('especie')
+
+        if q:
+            qs = qs.filter(
+                Q(nombre__icontains=q) | 
+                Q(raza__icontains=q) | 
+                Q(tutor__nombre__icontains=q)
+            )
+        if especie:
+            qs = qs.filter(especie=especie)
+            
+        return qs.order_by('nombre')
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['q'] = self.request.GET.get('q', '')
+        ctx['especie'] = self.request.GET.get('especie', '')
+        return ctx
 
 
 class MascotaCreateView(StaffRequiredMixin, CreateView):
@@ -254,22 +287,63 @@ class MascotaDeleteView(StaffRequiredMixin, DeleteView):
         return super().form_valid(form)
 
 
+class MascotaDetailView(LoginRequiredMixin, DetailView):
+    """Muestra la ficha completa de una mascota y su historial de citas."""
+    model = Mascota
+    template_name = 'clinica/mascota_detail.html'
+    context_object_name = 'mascota'
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        # Traemos todas las citas de esta mascota, ordenadas de la más reciente a la más antigua
+        citas = list(self.object.citas.select_related('profesional').order_by('-fecha_hora'))
+
+        # Datos extra que usa el template: si la cita tiene ficha y si es futura
+        ahora = timezone.now()
+        con_ficha = set(
+            FichaClinica.objects
+            .filter(cita__mascota=self.object)
+            .values_list('cita_id', flat=True)
+        )
+        for c in citas:
+            c.tiene_ficha = c.pk in con_ficha
+            c.es_futura = c.fecha_hora > ahora
+
+        ctx['citas'] = citas
+        return ctx
+
+
 # ============================================================================
 # CITA — CRUD + REGLAS DE NEGOCIO
 # ============================================================================
-class CitaListView(StaffRequiredMixin, ListView):
+class CitaListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     model = Cita
     template_name = 'clinica/cita_list.html'
     context_object_name = 'citas'
-    paginate_by = 20
+    paginate_by = 10
     permission_required = 'clinica.view_cita'
 
     def get_queryset(self):
-        return (
-            super().get_queryset()
-            .select_related('mascota', 'mascota__tutor', 'profesional')
-            .order_by('-fecha_hora')
-        )
+        qs = super().get_queryset().select_related('mascota', 'mascota__tutor', 'profesional')
+        q = self.request.GET.get('q')
+        estado = self.request.GET.get('estado')
+
+        if q:
+            qs = qs.filter(
+                Q(mascota__nombre__icontains=q) | 
+                Q(mascota__tutor__nombre__icontains=q) | 
+                Q(profesional__nombre__icontains=q)
+            )
+        if estado:
+            qs = qs.filter(estado=estado)
+            
+        return qs.order_by('-fecha_hora')
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['q'] = self.request.GET.get('q', '')
+        ctx['estado'] = self.request.GET.get('estado', '')
+        return ctx
 
 
 class CitaCreateView(StaffRequiredMixin, CreateView):
