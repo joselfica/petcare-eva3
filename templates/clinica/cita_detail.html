@@ -33,15 +33,15 @@
             <div class="pc-card-header">
                 <h3 class="h6 mb-0"><i class="bi bi-clipboard-pulse me-1"></i> Ficha clínica</h3>
                 
-                {# Solo el veterinario/admin puede crear o editar #}
-                {% if perms.clinica.add_fichaclinica %}
-                    {% if cita.ficha %}
+                {# Editar exige change_fichaclinica; crear exige add_fichaclinica #}
+                {% if cita.ficha %}
+                    {% if perms.clinica.change_fichaclinica %}
                         <a href="{% url 'clinica:ficha_update' cita.ficha.pk %}" class="btn btn-pc-secondary btn-sm">Editar</a>
-                    {% else %}
-                        <a href="{% url 'clinica:ficha_create' cita.pk %}" class="btn btn-pc-primary btn-sm">
-                            <i class="bi bi-plus-lg me-1"></i> Crear ficha
-                        </a>
                     {% endif %}
+                {% elif perms.clinica.add_fichaclinica %}
+                    <a href="{% url 'clinica:ficha_create' cita.pk %}" class="btn btn-pc-primary btn-sm">
+                        <i class="bi bi-plus-lg me-1"></i> Crear ficha
+                    </a>
                 {% endif %}
             </div>
 
