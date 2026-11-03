@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Confirmar eliminación — PetCare{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6">
+        <div class="pc-card border-danger">
+            <div class="pc-card-header border-danger">
+                <h2 class="text-danger"><i class="bi bi-exclamation-triangle me-2"></i>Confirmar eliminación</h2>
+            </div>
+            
+            <div class="py-4 text-center">
+                <i class="bi bi-trash display-3 text-muted mb-3"></i>
+                <h4 class="mb-3">¿Estás seguro?</h4>
+                <p class="text-muted">
+                    Estás a punto de eliminar a <strong>{{ objeto }}</strong>.<br>
+                    Esta acción no se puede deshacer.
+                </p>
+            </div>
+
+            <form method="post">
+                {% csrf_token %}
+                <div class="d-flex justify-content-center gap-2 mt-3 pt-3 border-top">
+                    <a href="{{ cancel_url|default:'javascript:history.back()' }}" class="btn btn-pc-secondary">
+                        <i class="bi bi-x-lg me-1"></i> Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-pc-danger">
+                        <i class="bi bi-trash me-1"></i> Sí, eliminar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
