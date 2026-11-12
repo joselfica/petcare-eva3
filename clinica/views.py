@@ -7,6 +7,7 @@ Propósito:
     Implementa las vistas del sistema PetCare con CBV:
         - HomeView (dashboard con KPIs y recordatorios).
         - CRUD de Tutores, Mascotas, Citas, Fichas Clínicas y Recordatorios.
+        - PortalClienteView (portal público de clientes).
 
 Seguridad:
     - Todas las CBV heredan de `StaffRequiredMixin`, que combina
@@ -124,8 +125,8 @@ class TutorListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
         q = self.request.GET.get('q')
         if q:
             qs = qs.filter(
-                Q(nombre__icontains=q) | 
-                Q(rut__icontains=q) | 
+                Q(nombre__icontains=q) |
+                Q(rut__icontains=q) |
                 Q(email__icontains=q)
             )
         return qs.order_by('nombre')
@@ -212,13 +213,13 @@ class MascotaListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
 
         if q:
             qs = qs.filter(
-                Q(nombre__icontains=q) | 
-                Q(raza__icontains=q) | 
+                Q(nombre__icontains=q) |
+                Q(raza__icontains=q) |
                 Q(tutor__nombre__icontains=q)
             )
         if especie:
             qs = qs.filter(especie=especie)
-            
+
         return qs.order_by('nombre')
 
     def get_context_data(self, **kwargs):
@@ -330,13 +331,13 @@ class CitaListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
 
         if q:
             qs = qs.filter(
-                Q(mascota__nombre__icontains=q) | 
-                Q(mascota__tutor__nombre__icontains=q) | 
+                Q(mascota__nombre__icontains=q) |
+                Q(mascota__tutor__nombre__icontains=q) |
                 Q(profesional__nombre__icontains=q)
             )
         if estado:
             qs = qs.filter(estado=estado)
-            
+
         return qs.order_by('-fecha_hora')
 
     def get_context_data(self, **kwargs):
@@ -578,7 +579,7 @@ def recordatorio_marcar_enviado(request, pk):
     recordatorio = get_object_or_404(Recordatorio, pk=pk)
     recordatorio.enviado = True
     recordatorio.save()
-    messages.success(self.request, 'Recordatorio marcado como enviado.')
+    messages.success(request, 'Recordatorio marcado como enviado.')
     return redirect('clinica:recordatorio_list')
 
 
@@ -595,7 +596,7 @@ def cita_confirmar_rapido(request, pk):
     if cita.estado == Cita.ESTADO_PENDIENTE:
         cita.estado = Cita.ESTADO_CONFIRMADA
         cita.save()
-        messages.success(self.request, f'Cita de {cita.mascota.nombre} confirmada exitosamente.')
+        messages.success(request, f'Cita de {cita.mascota.nombre} confirmada exitosamente.')
     return redirect('clinica:cita_list')
 
 
@@ -614,6 +615,7 @@ def api_mascotas_tutor(request, tutor_id):
         .values('id', 'nombre', 'especie')
     )
     return JsonResponse(list(mascotas), safe=False)
+
 
 # ============================================================================
 # PORTAL DE CLIENTES (vista pública, solo carga HTML)
