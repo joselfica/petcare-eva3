@@ -15,11 +15,11 @@ from . import api
 app_name = 'clinica'
 
 urlpatterns = [
-    # Dashboard
-    path('', views.HomeView.as_view(), name='home'),
+    # Portal de clientes (PÚBLICO - Página de inicio)
+    path('', views.PortalClienteView.as_view(), name='portal_cliente'),
 
-    # Portal de clientes (público)
-    path('portal/', views.PortalClienteView.as_view(), name='portal_cliente'),
+    # Dashboard interno (PRIVADO - Solo Staff)
+    path('dashboard/', views.HomeView.as_view(), name='home'),
 
     # Tutores
     path('tutores/', views.TutorListView.as_view(), name='tutor_list'),
