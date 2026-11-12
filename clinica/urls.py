@@ -10,12 +10,16 @@ las URLs y referenciarlas con `{% url 'clinica:xxx' %}`.
 from django.urls import path
 
 from . import views
+from . import api
 
 app_name = 'clinica'
 
 urlpatterns = [
     # Dashboard
     path('', views.HomeView.as_view(), name='home'),
+
+    # Portal de clientes (público)
+    path('portal/', views.PortalClienteView.as_view(), name='portal_cliente'),
 
     # Tutores
     path('tutores/', views.TutorListView.as_view(), name='tutor_list'),
@@ -51,4 +55,10 @@ urlpatterns = [
 
     # API auxiliar (filtro dinámico de mascotas por tutor en el formulario de citas)
     path('api/mascotas/<int:tutor_id>/', views.api_mascotas_tutor, name='api_mascotas_tutor'),
+
+    # API pública (Portal de Clientes)
+    path('api/profesionales/', api.lista_profesionales, name='api_profesionales'),
+    path('api/mascotas/', api.lista_mascotas, name='api_mascotas'),
+    path('api/citas/', api.crear_cita, name='api_crear_cita'),
+    path('api/registro/', api.registrar_tutor_mascota, name='api_registro'),
 ]

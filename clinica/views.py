@@ -614,3 +614,10 @@ def api_mascotas_tutor(request, tutor_id):
         .values('id', 'nombre', 'especie')
     )
     return JsonResponse(list(mascotas), safe=False)
+
+# ============================================================================
+# PORTAL DE CLIENTES (vista pública, solo carga HTML)
+# ============================================================================
+class PortalClienteView(TemplateView):
+    """Vista pública que carga el HTML del portal de clientes."""
+    template_name = 'portal_cliente.html'

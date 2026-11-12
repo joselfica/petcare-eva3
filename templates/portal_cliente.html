@@ -1,0 +1,677 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PetCare — Reserva tu Hora</title>
+
+    <!-- Fuentes y Bootstrap -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="{% static 'css/petcare.css' %}" rel="stylesheet">
+
+    <style>
+        :root {
+            --pc-primary: #2E7D6F;
+            --pc-primary-dark: #1e4d42;
+            --pc-primary-soft: #e6f4f1;
+            --pc-bg: #f8fafc;
+            --pc-ink: #334155;
+            --pc-muted: #64748b;
+            --pc-line: #e2e8f0;
+        }
+
+        body {
+            background-color: var(--pc-bg);
+            font-family: 'Inter', sans-serif;
+            color: var(--pc-ink);
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, var(--pc-primary-dark) 0%, var(--pc-primary) 100%);
+            color: #fff;
+            padding: 5rem 0 7rem 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::after {
+            content: "";
+            position: absolute;
+            bottom: -50px;
+            left: 0;
+            width: 100%;
+            height: 100px;
+            background-color: var(--pc-bg);
+            border-radius: 50% 50% 0 0;
+        }
+        .hero h1 { font-weight: 800; font-size: clamp(2rem, 4vw, 3rem); letter-spacing: -1px; }
+        .hero p { font-size: 1.15rem; opacity: 0.92; max-width: 640px; margin: 0 auto; }
+        .hero .badge-soft {
+            background: rgba(255,255,255,0.15);
+            color: #fff;
+            font-weight: 600;
+            padding: 0.45rem 1rem;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            letter-spacing: 0.3px;
+            backdrop-filter: blur(6px);
+        }
+
+        /* Tarjeta formulario */
+        .form-card {
+            background: #fff;
+            border-radius: 1rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            padding: 2.5rem;
+            margin-top: -4rem;
+            position: relative;
+            z-index: 10;
+            border: 1px solid rgba(0,0,0,0.05);
+            animation: slideUp 0.6s ease-out;
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @media (max-width: 991.98px) {
+            .form-card { margin-top: 2rem; padding: 1.75rem; }
+        }
+
+        /* Inputs */
+        .form-control, .form-select {
+            padding: 0.8rem 1rem;
+            border-radius: 0.5rem;
+            border: 1.5px solid var(--pc-line);
+            font-weight: 500;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: var(--pc-primary);
+            box-shadow: 0 0 0 4px rgba(46, 125, 111, 0.1);
+        }
+        .form-label { font-weight: 600; color: var(--pc-ink); margin-bottom: 0.5rem; }
+
+        .btn-pc-primary {
+            background-color: var(--pc-primary);
+            border-color: var(--pc-primary);
+            color: #fff;
+            font-weight: 600;
+        }
+        .btn-pc-primary:hover,
+        .btn-pc-primary:focus {
+            background-color: var(--pc-primary-dark);
+            border-color: var(--pc-primary-dark);
+            color: #fff;
+        }
+        .btn-pc-primary:disabled { opacity: 0.75; }
+
+        /* Iconos de servicios */
+        .service-icon {
+            font-size: 1.75rem;
+            color: var(--pc-primary);
+            background: var(--pc-primary-soft);
+            width: 60px;
+            height: 60px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .service-item h5 { color: var(--pc-primary-dark); }
+        .service-item p { color: var(--pc-muted); }
+
+        /* Estado de carga de selects */
+        .select-loading { opacity: 0.65; pointer-events: none; }
+
+        /* Preview de la reserva */
+        .reserva-preview {
+            background: var(--pc-primary-soft);
+            border-left: 4px solid var(--pc-primary);
+            border-radius: 0.5rem;
+            padding: 0.9rem 1.1rem;
+            font-size: 0.9rem;
+            color: var(--pc-primary-dark);
+            display: none;
+        }
+        .reserva-preview strong { font-weight: 700; }
+
+        /* Estilo para los botones de servicio */
+        .btn-outline-primary {
+            border: 2px solid #e2e8f0;
+            color: #64748b;
+            transition: all 0.2s ease;
+            text-align: left;
+        }
+        .btn-outline-primary:hover {
+            background-color: #f8fafc;
+            border-color: var(--pc-primary);
+            color: var(--pc-primary);
+        }
+        .btn-check:checked + .btn-outline-primary {
+            background-color: var(--pc-primary-soft);
+            border-color: var(--pc-primary);
+            color: var(--pc-primary-dark);
+            box-shadow: 0 0 0 2px rgba(46, 125, 111, 0.2);
+        }
+        .btn-check:checked + .btn-outline-primary i {
+            color: var(--pc-primary);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar pública -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-transparent position-absolute w-100" style="z-index: 20;">
+        <div class="container">
+            <a class="navbar-brand fw-bold fs-4" href="{% url 'clinica:portal_cliente' %}">
+                <i class="bi bi-heart-pulse-fill text-warning me-2"></i>PetCare
+            </a>
+            <div class="ms-auto">
+                <a href="{% url 'login' %}" class="btn btn-outline-light btn-sm rounded-pill px-3">
+                    <i class="bi bi-box-arrow-in-right me-1"></i>Acceso Personal
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <div class="hero">
+        <div class="container">
+            <br><br>
+            <span class="badge-soft mb-3 d-inline-block"><i class="bi bi-paw-fill me-1"></i> Portal de Clientes</span>
+            <h1 class="mt-3">El mejor cuidado para tu mejor amigo</h1>
+            <p class="mt-3">Reserva una cita médica en segundos. Sin filas, sin esperas.</p>
+        </div>
+    </div>
+
+    <div class="container pb-5">
+        <div class="row">
+
+            <!-- Columna izquierda: Info -->
+            <div class="col-lg-5 mb-4">
+                <div class="pe-lg-4 mt-4">
+                    <h3 class="fw-bold mb-4">¿Por qué elegir PetCare?</h3>
+
+                    <div class="d-flex mb-4 service-item">
+                        <div class="me-3">
+                            <div class="service-icon"><i class="bi bi-shield-check"></i></div>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-1">Profesionales Certificados</h5>
+                            <p class="small mb-0">Nuestro equipo de veterinarios cuenta con años de experiencia en el cuidado animal.</p>
+                        </div>
+                    </div>
+
+                    <div class="d-flex mb-4 service-item">
+                        <div class="me-3">
+                            <div class="service-icon"><i class="bi bi-calendar2-check"></i></div>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-1">Reserva Inmediata</h5>
+                            <p class="small mb-0">Selecciona la hora que más te acomode. El sistema validará la disponibilidad al instante.</p>
+                        </div>
+                    </div>
+
+                    <div class="d-flex service-item">
+                        <div class="me-3">
+                            <div class="service-icon"><i class="bi bi-heart-pulse"></i></div>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-1">Seguimiento Automático</h5>
+                            <p class="small mb-0">Una vez atendido, generamos un recordatorio automático para tus próximas vacunas.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Columna derecha: Formulario -->
+            <div class="col-lg-7">
+                <div class="form-card">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="bg-primary bg-opacity-10 p-2 rounded me-3">
+                            <i class="bi bi-calendar-plus text-primary fs-3"></i>
+                        </div>
+                        <div>
+                            <h3 class="fw-bold mb-0">Agenda tu visita</h3>
+                            <p class="text-muted mb-0 small">Completa los datos a continuación</p>
+                        </div>
+                    </div>
+
+                    <!-- Alerta de errores/éxito -->
+                    <div id="alerta" class="alert d-none fw-semibold" role="alert"></div>
+
+                    <form id="formReserva" novalidate>
+                        <!-- Selección de Servicio (Tipo de Visita) -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold mb-3">1. ¿Qué tipo de atención necesitas?</label>
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <input type="radio" class="btn-check" name="tipo_servicio" id="srv_consulta" value="CONSULTA" checked>
+                                    <label class="btn btn-outline-primary w-100 py-3 rounded-3 text-start" for="srv_consulta">
+                                        <i class="bi bi-clipboard2-pulse fs-4 d-block mb-1"></i>
+                                        <strong class="d-block">Consulta</strong>
+                                        <small class="text-muted d-block" style="font-size:0.75rem;">Chequeo general</small>
+                                    </label>
+                                </div>
+                                <div class="col-6">
+                                    <input type="radio" class="btn-check" name="tipo_servicio" id="srv_vacuna" value="VACUNACION">
+                                    <label class="btn btn-outline-primary w-100 py-3 rounded-3 text-start" for="srv_vacuna">
+                                        <i class="bi bi-capsule fs-4 d-block mb-1"></i>
+                                        <strong class="d-block">Vacunación</strong>
+                                        <small class="text-muted d-block" style="font-size:0.75rem;">Refuerzo anual</small>
+                                    </label>
+                                </div>
+                                <div class="col-6">
+                                    <input type="radio" class="btn-check" name="tipo_servicio" id="srv_cirugia" value="CIRUGIA">
+                                    <label class="btn btn-outline-primary w-100 py-3 rounded-3 text-start" for="srv_cirugia">
+                                        <i class="bi bi-scissors fs-4 d-block mb-1"></i>
+                                        <strong class="d-block">Cirugía</strong>
+                                        <small class="text-muted d-block" style="font-size:0.75rem;">Procedimiento</small>
+                                    </label>
+                                </div>
+                                <div class="col-6">
+                                    <input type="radio" class="btn-check" name="tipo_servicio" id="srv_estetica" value="ESTETICA">
+                                    <label class="btn btn-outline-primary w-100 py-3 rounded-3 text-start" for="srv_estetica">
+                                        <i class="bi bi-stars fs-4 d-block mb-1"></i>
+                                        <strong class="d-block">Estética</strong>
+                                        <small class="text-muted d-block" style="font-size:0.75rem;">Baño y corte</small>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Selección de Mascota -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">2. ¿Para quién es la hora?</label>
+                            <select id="mascota" class="form-select form-select-lg" required>
+                                <option value="">Cargando pacientes...</option>
+                            </select>
+                            <div class="mt-2 text-end">
+                                <button type="button" class="btn btn-sm btn-link text-decoration-none" id="btnNuevaMascota">
+                                    <i class="bi bi-plus-circle me-1"></i> Mi mascota no está registrada
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Formulario oculto para registrar nueva mascota -->
+                        <div id="seccionRegistro" class="p-3 mb-3 bg-light rounded border border-primary border-opacity-25" style="display: none;">
+                            <h6 class="fw-bold text-primary mb-3"><i class="bi bi-person-plus me-1"></i> Registro rápido</h6>
+                            <div class="row g-2">
+                                <div class="col-md-6">
+                                    <input type="text" id="reg_tutor_nombre" class="form-control" placeholder="Tu Nombre Completo" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <input type="text" id="reg_tutor_telefono" class="form-control" placeholder="Tu Teléfono (+569...)" required>
+                                </div>
+                                <div class="col-md-6 mt-2">
+                                    <input type="text" id="reg_mascota_nombre" class="form-control" placeholder="Nombre de tu mascota" required>
+                                </div>
+                                <div class="col-md-6 mt-2">
+                                    <select id="reg_mascota_especie" class="form-select">
+                                        <option value="PERRO">Perro</option>
+                                        <option value="GATO">Gato</option>
+                                        <option value="OTRO">Otro</option>
+                                    </select>
+                                </div>
+                                <div class="col-12 mt-2 text-end">
+                                    <button type="button" class="btn btn-sm btn-pc-primary" id="btnGuardarMascota">
+                                        <i class="bi bi-check2 me-1"></i> Guardar y Seleccionar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Selección de Doctor y Fecha -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">3. Profesional y Horario</label>
+                            <div class="row g-2">
+                                <div class="col-md-6">
+                                    <select id="profesional" class="form-select form-select-lg" required>
+                                        <option value="">Cargando doctores...</option>
+                                    </select>
+                                    <div class="invalid-feedback">Selecciona un profesional.</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <input type="datetime-local" id="fecha_hora" class="form-control form-control-lg" required>
+                                    <div class="invalid-feedback">Selecciona fecha y hora.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Motivo -->
+                        <div class="col-12 mb-4">
+                            <label class="form-label fw-bold">4. Motivo de la consulta</label>
+                            <textarea id="motivo" class="form-control" rows="2" required maxlength="300" placeholder="Ej: Mi perro tiene tos..."></textarea>
+                            <div class="form-text text-end"><span id="contadorMotivo">0</span>/300</div>
+                        </div>
+
+                        <!-- Preview de la reserva -->
+                        <div class="col-12 mb-3">
+                            <div class="reserva-preview" id="reservaPreview"></div>
+                        </div>
+
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-pc-primary btn-lg w-100 rounded-pill shadow-sm" id="btnReservar">
+                                Confirmar Reserva <i class="bi bi-arrow-right ms-2"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="text-center py-5 text-muted border-top bg-white mt-5">
+        <small>PetCare · Sistema Clínico Veterinario · 2026</small>
+    </footer>
+
+    <!-- Lógica JavaScript -->
+    <script>
+        // Endpoint base del API (las rutas se definen en clinica/urls.py
+        // como path('api/...'), sin el prefijo de la app).
+        const API_BASE = '/api';
+
+        const $ = (id) => document.getElementById(id);
+        const selectMascota = $('mascota');
+        const selectProfesional = $('profesional');
+        const inputFecha = $('fecha_hora');
+        const inputMotivo = $('motivo');
+        const contadorMotivo = $('contadorMotivo');
+        const reservaPreview = $('reservaPreview');
+        const btnReservar = $('btnReservar');
+        const alerta = $('alerta');
+
+        // ------------------------------------------------------------------
+        // Utilidades
+        // ------------------------------------------------------------------
+        function mostrarAlerta(mensaje, tipo = 'danger') {
+            alerta.className = `alert alert-${tipo} shadow-sm border-${tipo} fw-semibold`;
+            alerta.innerHTML = mensaje;
+            alerta.classList.remove('d-none');
+            window.scrollTo({ top: 180, behavior: 'smooth' });
+        }
+
+        function ocultarAlerta() {
+            alerta.classList.add('d-none');
+        }
+
+        function escaparHtml(str) {
+            return String(str ?? '').replace(/[&<>"']/g, (c) => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            }[c]));
+        }
+
+        function setSelectCargando(select, texto) {
+            select.classList.add('select-loading');
+            select.innerHTML = `<option value="">${texto}</option>`;
+        }
+
+        function setSelectListo(select) {
+            select.classList.remove('select-loading');
+        }
+
+        // Fecha mínima: ahora + 1 hora (evita validaciones de "fecha pasada")
+        function aplicarFechaMinima() {
+            const ahora = new Date();
+            ahora.setMinutes(0, 0, 0);
+            ahora.setHours(ahora.getHours() + 1);
+            const iso = new Date(ahora.getTime() - ahora.getTimezoneOffset() * 60000)
+                .toISOString().slice(0, 16);
+            inputFecha.min = iso;
+        }
+
+        // ------------------------------------------------------------------
+        // Carga inicial de datos (mascotas + profesionales)
+        // ------------------------------------------------------------------
+        async function cargarProfesionales() {
+            setSelectCargando(selectProfesional, 'Cargando doctores...');
+            try {
+                const res = await fetch(`${API_BASE}/profesionales/`, { headers: { 'Accept': 'application/json' } });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const profesionales = await res.json();
+                selectProfesional.innerHTML = '<option value="">Elige un doctor...</option>';
+                profesionales.forEach((p) => {
+                    const opt = document.createElement('option');
+                    opt.value = p.id;
+                    opt.textContent = `Dr(a). ${p.nombre} — ${p.especialidad ?? ''}`.trim();
+                    selectProfesional.appendChild(opt);
+                });
+            } catch (err) {
+                console.error(err);
+                setSelectCargando(selectProfesional, 'Error al cargar profesionales');
+            } finally {
+                setSelectListo(selectProfesional);
+            }
+        }
+
+        async function cargarMascotas() {
+            setSelectCargando(selectMascota, 'Cargando pacientes...');
+            try {
+                const res = await fetch(`${API_BASE}/mascotas/`, { headers: { 'Accept': 'application/json' } });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const mascotas = await res.json();
+                selectMascota.innerHTML = '<option value="">Elige a tu mascota...</option>';
+                mascotas.forEach((m) => {
+                    const opt = document.createElement('option');
+                    opt.value = m.id;
+                    opt.textContent = `${m.nombre} (${m.especie}) — Tutor: ${m.tutor_nombre ?? '—'}`;
+                    selectMascota.appendChild(opt);
+                });
+            } catch (err) {
+                console.error(err);
+                setSelectCargando(selectMascota, 'Error al cargar mascotas');
+            } finally {
+                setSelectListo(selectMascota);
+            }
+        }
+
+        // ------------------------------------------------------------------
+        // Preview de la reserva mientras el usuario completa el formulario
+        // ------------------------------------------------------------------
+        function actualizarPreview() {
+            const mascotaTxt = selectMascota.selectedOptions[0]?.textContent ?? '';
+            const profTxt = selectProfesional.selectedOptions[0]?.textContent ?? '';
+            const fechaTxt = inputFecha.value;
+            const servicioTxt = document.querySelector('input[name="tipo_servicio"]:checked')
+                ?.nextElementSibling?.querySelector('strong')?.textContent ?? '';
+
+            if (!mascotaTxt || !profTxt || !fechaTxt) {
+                reservaPreview.style.display = 'none';
+                return;
+            }
+
+            const f = new Date(fechaTxt);
+            const fechaLarga = f.toLocaleString('es-CL', {
+                weekday: 'long', day: 'numeric', month: 'long',
+                hour: '2-digit', minute: '2-digit'
+            });
+
+            reservaPreview.style.display = 'block';
+            reservaPreview.innerHTML = `
+                <i class="bi bi-clipboard-check me-2"></i>
+                <strong>Resumen:</strong> ${escaparHtml(servicioTxt)} para ${escaparHtml(mascotaTxt)} con ${escaparHtml(profTxt)}
+                el <strong>${escaparHtml(fechaLarga)}</strong>.
+            `;
+        }
+
+        // ------------------------------------------------------------------
+        // Envío del formulario
+        // ------------------------------------------------------------------
+        async function enviarReserva(event) {
+            event.preventDefault();
+            ocultarAlerta();
+
+            // Validación nativa de Bootstrap
+            const form = event.currentTarget;
+            if (!form.checkValidity()) {
+                form.classList.add('was-validated');
+                return;
+            }
+
+            // Obtener el tipo de servicio seleccionado
+            const tipoServicio = document.querySelector('input[name="tipo_servicio"]:checked').value;
+
+            const payload = {
+                mascota: Number(selectMascota.value),
+                profesional: Number(selectProfesional.value),
+                // El input datetime-local entrega "YYYY-MM-DDTHH:MM"
+                fecha_hora: inputFecha.value.length === 16 ? `${inputFecha.value}:00` : inputFecha.value,
+                duracion_min: 30,
+                // Inyectamos el tipo de servicio en el motivo para que el veterinario lo vea
+                motivo: `[${tipoServicio}] ${inputMotivo.value.trim()}`,
+                estado: 'PEND',
+            };
+
+            const textoOriginal = btnReservar.innerHTML;
+            btnReservar.disabled = true;
+            btnReservar.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Validando disponibilidad...';
+
+            try {
+                const response = await fetch(`${API_BASE}/citas/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify(payload),
+                });
+
+                // El backend puede devolver JSON o un error en texto plano
+                let data = {};
+                try { data = await response.json(); } catch { /* ignore */ }
+
+                if (response.ok) {
+                    mostrarAlerta('<i class="bi bi-check-circle me-2"></i> ¡Reserva Exitosa! Te esperamos en PetCare. 🐾', 'success');
+                    form.reset();
+                    form.classList.remove('was-validated');
+                    contadorMotivo.textContent = '0';
+                    reservaPreview.style.display = 'none';
+                } else {
+                    // Extrae el mensaje del backend si viene en estructuras conocidas
+                    const mensaje = data.error
+                        || data.detail
+                        || (data.non_field_errors && data.non_field_errors[0])
+                        || (typeof data === 'object' ? JSON.stringify(data) : '')
+                        || 'Verifica los datos ingresados.';
+
+                    mostrarAlerta(`<i class="bi bi-exclamation-triangle me-2"></i> ${escaparHtml(mensaje)}`, 'danger');
+                }
+            } catch (err) {
+                console.error(err);
+                mostrarAlerta('<i class="bi bi-wifi-off me-2"></i> Error de conexión con el servidor de reservas.', 'danger');
+            } finally {
+                btnReservar.disabled = false;
+                btnReservar.innerHTML = textoOriginal;
+            }
+        }
+
+        // ------------------------------------------------------------------
+        // Registro rápido de mascota
+        // ------------------------------------------------------------------
+        const btnNuevaMascota = $('btnNuevaMascota');
+        const seccionRegistro = $('seccionRegistro');
+        const btnGuardarMascota = $('btnGuardarMascota');
+
+        btnNuevaMascota.addEventListener('click', () => {
+            if (seccionRegistro.style.display === 'none' || !seccionRegistro.style.display) {
+                seccionRegistro.style.display = 'block';
+                selectMascota.required = false; // Ya no es obligatorio elegir una existente
+                selectMascota.classList.remove('is-invalid');
+            } else {
+                seccionRegistro.style.display = 'none';
+                selectMascota.required = true;
+            }
+        });
+
+        btnGuardarMascota.addEventListener('click', async () => {
+            const nombreTutor = $('reg_tutor_nombre').value.trim();
+            const telefono = $('reg_tutor_telefono').value.trim();
+            const nombreMascota = $('reg_mascota_nombre').value.trim();
+            const especie = $('reg_mascota_especie').value;
+
+            if (!nombreTutor || !telefono || !nombreMascota) {
+                mostrarAlerta('Por favor, completa todos los campos del registro.', 'warning');
+                return;
+            }
+
+            btnGuardarMascota.disabled = true;
+            btnGuardarMascota.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+
+            try {
+                const res = await fetch(`${API_BASE}/registro/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify({
+                        tutor_nombre: nombreTutor,
+                        tutor_telefono: telefono,
+                        mascota_nombre: nombreMascota,
+                        mascota_especie: especie
+                    })
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    // Agregar la nueva mascota al select y seleccionarla
+                    const opt = document.createElement('option');
+                    opt.value = data.mascota_id;
+                    opt.textContent = `${data.mascota_nombre} (${especie}) — Tutor: ${nombreTutor}`;
+                    selectMascota.appendChild(opt);
+                    selectMascota.value = data.mascota_id;
+
+                    // Ocultar el registro, limpiar campos y restaurar required
+                    seccionRegistro.style.display = 'none';
+                    selectMascota.required = true;
+                    $('reg_tutor_nombre').value = '';
+                    $('reg_tutor_telefono').value = '';
+                    $('reg_mascota_nombre').value = '';
+
+                    mostrarAlerta('¡Mascota registrada con éxito! Ahora puedes agendar la hora.', 'success');
+
+                    // Disparar el evento change para actualizar el preview
+                    selectMascota.dispatchEvent(new Event('change'));
+                } else {
+                    mostrarAlerta(data.error || 'Error al registrar la mascota.', 'danger');
+                }
+            } catch (error) {
+                console.error(error);
+                mostrarAlerta('Error de conexión al registrar la mascota.', 'danger');
+            } finally {
+                btnGuardarMascota.disabled = false;
+                btnGuardarMascota.innerHTML = '<i class="bi bi-check2 me-1"></i> Guardar y Seleccionar';
+            }
+        });
+
+        // ------------------------------------------------------------------
+        // Bootstrap de la página
+        // ------------------------------------------------------------------
+        document.addEventListener('DOMContentLoaded', () => {
+            aplicarFechaMinima();
+            cargarProfesionales();
+            cargarMascotas();
+
+            selectMascota.addEventListener('change', actualizarPreview);
+            selectProfesional.addEventListener('change', actualizarPreview);
+            inputFecha.addEventListener('change', actualizarPreview);
+
+            // Actualizar el preview también al cambiar el tipo de servicio
+            document.querySelectorAll('input[name="tipo_servicio"]').forEach((radio) => {
+                radio.addEventListener('change', actualizarPreview);
+            });
+
+            inputMotivo.addEventListener('input', () => {
+                contadorMotivo.textContent = inputMotivo.value.length;
+            });
+
+            $('formReserva').addEventListener('submit', enviarReserva);
+        });
+    </script>
+</body>
+</html>
